@@ -55,7 +55,6 @@
      <Compile Include="Assets\Scripts\MeshMapChild.cs" />
      <Compile Include="Assets\Scripts\ObstacleInterface.cs" />
      <Compile Include="Assets\Scripts\PrefabShim.cs" />
-     <Compile Include="Assets\Scripts\ShapeLoader.cs" />
      <Compile Include="Assets\Scripts\StealthCamera.cs" />
      <Compile Include="Assets\Scripts\StealthCoordGuard.cs" />
      <Compile Include="Assets\Scripts\StealthCoordPlayer.cs" />
@@ -72,6 +71,7 @@
      <Compile Include="Assets\Scripts\Waypoints\Waypoint.cs" />
      <Compile Include="Assets\Scripts\Waypoints\WaypointManager.cs" />
      <Compile Include="Assets\Scripts\test\Class1.cs" />
+     <Compile Include="Assets\Scripts\test\Class2.cs" />
      <Compile Include="Assets\Scripts\test\CsgTest.cs" />
      <Compile Include="Assets\Scripts\test\ShapeSplitTest.cs" />
   </ItemGroup>

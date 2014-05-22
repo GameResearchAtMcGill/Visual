@@ -2,32 +2,35 @@
 
 
 [ExecuteInEditMode]
-public class ShapeSplitTest : MonoBehaviour {
-	public bool initialized = false;
-	public bool reset = false;
+public class Class2 : MonoBehaviour {
 	
 	public void OnDrawGizmos() {
-		Shape3 sh = new Shape3();
-		sh.AddVertex(new Vector3(10, 0, -5));
-		sh.AddVertex(new Vector3(-10, 0, -15));
-		sh.AddVertex(new Vector3(-15, 0, -5));
-		sh.AddVertex(new Vector3(-15, 0, 5));
-		sh.AddVertex(new Vector3(-10, 0, 15));
-		sh.AddVertex(new Vector3(10, 0, 5));
-		
-		foreach (Edge3Abs e in sh) {
-			Gizmos.DrawLine(e.a, e.b);
-		}
-		
-		Shape3[] shapes = sh.SplitInTwo(new Vector3(20, 0, 0), new Vector3(-1, 0, 0));
+		Shape3 clipper = new Shape3();
+		Quaternion q = Quaternion.Euler(0, 0, 0);
+		clipper.AddVertex(q * new Vector3(10, 0, 10));
+		clipper.AddVertex(q * new Vector3(10, 0, -10));
+		clipper.AddVertex(q * new Vector3(-10, 0, -10));
+		clipper.AddVertex(q * new Vector3(-10, 0, 10));
 		
 		Gizmos.color = Color.red;
-		foreach (Edge3Abs e in shapes[0]) {
+		foreach (Edge3Abs e in clipper) {
 			Gizmos.DrawLine(e.a, e.b);
 		}
 		
+		Shape3 clippee = new Shape3();
+		clippee.AddVertex(new Vector3(0, 0, -20));
+		clippee.AddVertex(new Vector3(-20, 0, 30));
+		clippee.AddVertex(new Vector3(20, 0, 30));
+		
+		Gizmos.color = Color.white;
+		foreach (Edge3Abs e in clippee) {
+			Gizmos.DrawLine(e.a, e.b);
+		}
+		
+		Shape3 clipped = clippee.Clip(clipper);
+		
 		Gizmos.color = Color.green;
-		foreach (Edge3Abs e in shapes[1]) {
+		foreach (Edge3Abs e in clipped) {
 			Gizmos.DrawLine(e.a, e.b);
 		}
 	}
@@ -50,16 +53,12 @@ public class ShapeSplitTest : MonoBehaviour {
 	// Called once when created, thereafter only when clicking on reset
 	public void Reset() {
 		//Debug.Log("reset");
-		if (!initialized) {
-			
-			initialized = true;
-		}
+		
 	}
 	
 	public void OnValidate() {
-		if (reset) {
-			reset = false;
-		}
+		Debug.Log("validate");
+		
 	}
 	
 	// Called at every frame

@@ -181,10 +181,10 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 	
 	public void RefreshShapeCache() {
 		s.Clear();
-		s.addVertex (rotationQ * new Vector3 (sizeX * 0.5f, 0, sizeZ * 0.5f) + position);
-		s.addVertex (rotationQ * new Vector3(sizeX*0.5f, 0, -sizeZ*0.5f) + position);
-		s.addVertex (rotationQ * new Vector3(-sizeX*0.5f, 0, -sizeZ*0.5f) + position);
-		s.addVertex (rotationQ * new Vector3(-sizeX*0.5f, 0, sizeZ*0.5f) + position);
+		s.AddVertex (rotationQ * new Vector3 (sizeX * 0.5f, 0, sizeZ * 0.5f) + position);
+		s.AddVertex (rotationQ * new Vector3(sizeX*0.5f, 0, -sizeZ*0.5f) + position);
+		s.AddVertex (rotationQ * new Vector3(-sizeX*0.5f, 0, -sizeZ*0.5f) + position);
+		s.AddVertex (rotationQ * new Vector3(-sizeX*0.5f, 0, sizeZ*0.5f) + position);
 	}
 	
 	public void OnEnable() {
@@ -199,10 +199,10 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 	private Shape3 ShadowPoly(Vector3 viewpoint, float viewDistance) {
 		Shape3 obsShape = new Shape3 ();
 
-		obsShape.addVertex (rotationQ * new Vector3(sizeX * 0.5f, viewpoint.y, sizeZ * 0.5f) + position);
-		obsShape.addVertex (rotationQ * new Vector3(sizeX*0.5f, viewpoint.y, -sizeZ*0.5f) + position);
-		obsShape.addVertex (rotationQ * new Vector3(-sizeX*0.5f, viewpoint.y, -sizeZ*0.5f) + position);
-		obsShape.addVertex (rotationQ * new Vector3(-sizeX*0.5f, viewpoint.y, sizeZ*0.5f) + position);
+		obsShape.AddVertex (rotationQ * new Vector3(sizeX * 0.5f, viewpoint.y, sizeZ * 0.5f) + position);
+		obsShape.AddVertex (rotationQ * new Vector3(sizeX*0.5f, viewpoint.y, -sizeZ*0.5f) + position);
+		obsShape.AddVertex (rotationQ * new Vector3(-sizeX*0.5f, viewpoint.y, -sizeZ*0.5f) + position);
+		obsShape.AddVertex (rotationQ * new Vector3(-sizeX*0.5f, viewpoint.y, sizeZ*0.5f) + position);
 
 		int first = 13; // bogus int for signalling uninitialization
 
@@ -239,11 +239,11 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 		int v = 0;
 		Shape3 shape = new Shape3 ();
 		if (count == 4) {
-			IEnumerator obsShapeRH = obsShape.Reverse();
+			IEnumerator obsShapeRH = obsShape.GetReverseEnumerator();
 			while(obsShapeRH.MoveNext()) {
 				Edge3Abs e = (Edge3Abs)obsShapeRH.Current;
 				//shape.addVertex ((e.a - viewpoint).normalized * farthest + viewpoint);
-				shape.addVertex (e.a);
+				shape.AddVertex (e.a);
 			}
 		} else {
 
@@ -251,16 +251,16 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 				if (projectedEdge [j % 4]) {
 					// Should add an edge from unprojected to projected
 					if (!projectedEdge [((j - 1) % 4 + 4) % 4]) {
-							shape.addVertex ((obsShape [j % 4] - viewpoint).normalized * farthest + viewpoint);
+							shape.AddVertex ((obsShape [j % 4] - viewpoint).normalized * farthest + viewpoint);
 					}
-					shape.addVertex((obsShape [(j + 1) % 4] - viewpoint).normalized * farthest + viewpoint);
+					shape.AddVertex((obsShape [(j + 1) % 4] - viewpoint).normalized * farthest + viewpoint);
 				} else {
 					if (v == 0) {
-						shape.addVertex (obsShape [j % 4]);
-						shape.addVertex (obsShape [(j + 1) % 4]);
+						shape.AddVertex (obsShape [j % 4]);
+						shape.AddVertex (obsShape [(j + 1) % 4]);
 						v = 2;
 					} else {
-						shape.addVertex (obsShape [(j + 1) % 4]);
+						shape.AddVertex (obsShape [(j + 1) % 4]);
 					}
 				}
 			}

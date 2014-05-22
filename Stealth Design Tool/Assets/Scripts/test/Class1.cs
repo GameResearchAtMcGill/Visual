@@ -100,16 +100,16 @@ public class Class1 : MonoBehaviour {
 	public Shape3 Shape() {
 		Shape3 s = new Shape3();
 		
-		s.addVertex(twoDim);
+		s.AddVertex(twoDim);
 		
 		float angle = -transform.rotation.eulerAngles.y + fov * 0.5f;
 		float step = fov / segments;
 		
 		for (int i = 0; i < segments; i++) {
-			s.addVertex(new Vector3(twoDim.x + Mathf.Cos(angle * Mathf.Deg2Rad)*viewDist, 0, twoDim.z + Mathf.Sin(angle * Mathf.Deg2Rad)*viewDist));
+			s.AddVertex(new Vector3(twoDim.x + Mathf.Cos(angle * Mathf.Deg2Rad)*viewDist, 0, twoDim.z + Mathf.Sin(angle * Mathf.Deg2Rad)*viewDist));
 			angle -= step;
 		}
-		s.addVertex(new Vector3(twoDim.x + Mathf.Cos(angle * Mathf.Deg2Rad)*viewDist, 0, twoDim.z + Mathf.Sin(angle * Mathf.Deg2Rad)*viewDist));
+		s.AddVertex(new Vector3(twoDim.x + Mathf.Cos(angle * Mathf.Deg2Rad)*viewDist, 0, twoDim.z + Mathf.Sin(angle * Mathf.Deg2Rad)*viewDist));
 		
 		return s;
 	}
@@ -263,7 +263,7 @@ public class Class1 : MonoBehaviour {
 		// Vision Algorithm
 		Gizmos.color = Color.black;
 		thisShape.Clear();
-		thisShape.addVertex(twoDim);
+		thisShape.AddVertex(twoDim);
 		list2.Clear();
 		KeyValuePair<PolarCoord, Edge3Abs>? curr = null;
 		//IEnumerator<KeyValuePair<PolarCoord, Edge3Abs>> en = slist.GetEnumerator();
@@ -319,14 +319,14 @@ public class Class1 : MonoBehaviour {
 				if (kvInter == null) {
 					// Unless kv is directly next
 					if (curr.Value.Value.b == kv.Value.a) {
-						thisShape.addVertex(curr.Value.Value.b);
+						thisShape.AddVertex(curr.Value.Value.b);
 						Gizmos.DrawSphere(curr.Value.Value.b, 1);
 						list2.Add(kv.Key.GetReverse(), kv.Value);
 						curr = kv;
 						continue;
 					}
 					
-					thisShape.addVertex(curr.Value.Value.b);
+					thisShape.AddVertex(curr.Value.Value.b);
 					
 					if (list2.Count > 0) {
 						closest = twoDim + (curr.Value.Value.b - twoDim).normalized * viewDist * 2f;
@@ -343,7 +343,7 @@ public class Class1 : MonoBehaviour {
 						
 						if (closest != e.b) {
 							// Pathos
-							thisShape.addVertex(closest);
+							thisShape.AddVertex(closest);
 							curr = new KeyValuePair<PolarCoord, Edge3Abs>(kvInter.Value.Key.GetReverse(), kvInter.Value.Value);
 							continue;
 						} else {
@@ -354,7 +354,7 @@ public class Class1 : MonoBehaviour {
 					}
 				// Otherwise, add point at intersection, consider the new edge as curr
 				} else {
-					thisShape.addVertex(closest);
+					thisShape.AddVertex(closest);
 					curr = new KeyValuePair<PolarCoord, Edge3Abs>(kvInter.Value.Key.GetReverse(), kvInter.Value.Value);
 				}
 				
@@ -367,10 +367,10 @@ public class Class1 : MonoBehaviour {
 				// If the new edge is closer than curr, project from it
 				if (curr.Value.Value.rightOf(kv.Value.a)) {
 					Edge3Abs e = new Edge3Abs(twoDim, twoDim + (kv.Value.a - twoDim).normalized * viewDist * 2f);
-					thisShape.addVertex(e.IntersectXZ(curr.Value.Value));
+					thisShape.AddVertex(e.IntersectXZ(curr.Value.Value));
 					
 					//Gizmos.DrawSphere(kv.Value.a, 1);
-					thisShape.addVertex(kv.Value.a);
+					thisShape.AddVertex(kv.Value.a);
 					
 					//list2.Add(curr.Value.Key.GetReverse(), curr.Value.Value);
 					
@@ -385,7 +385,7 @@ public class Class1 : MonoBehaviour {
 						list2.Add(kv.Key.GetReverse(), kv.Value);
 					// Intersection -> Add vertex, go to kv
 					} else {
-						thisShape.addVertex(inter);
+						thisShape.AddVertex(inter);
 						curr = kv;
 					}
 				}
