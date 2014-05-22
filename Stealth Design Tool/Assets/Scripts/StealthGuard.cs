@@ -75,8 +75,7 @@ public abstract class StealthGuard : StealthFov {
 		
 		int ind = 1;
 		for (int i = 0; i < numSub; i++) {
-			Shape3 vision = StealthFov.Vertices(viewDistance, fieldOfView, frontSegments, position + pos, rotation + rot);
-			shLst.Add(StealthFov.Occlude(map, vision, position + pos, viewDistance));
+			shLst.Add(Occlude(position + pos, rotation + rot));
 			
 			pos += timeStep * (current.Value.rotationQ * current.Value.velocity);
 			rot += timeStep * current.Value.omega;
@@ -115,11 +114,6 @@ public abstract class StealthGuard : StealthFov {
 	}
 	
 	new public void Validate() {
-		position.y = 0;
-
-		if (dirty) {
-			UpdateMesh ();
-			dirty = false;
-		}
+		base.Validate();
 	}
 }

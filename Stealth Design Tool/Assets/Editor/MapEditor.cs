@@ -12,11 +12,20 @@ public class MapEditor : Editor {
 
 	public override void OnInspectorGUI()
 	{
+		GUI.skin.label.wordWrap = true;
+		
+		GUILayout.Label("Map Parameters", EditorStyles.boldLabel);
 		m.sizeX = EditorGUILayout.FloatField ("Size X:", m.sizeX);
 		m.timeLength = EditorGUILayout.FloatField ("Time length:", m.timeLength);
 		m.sizeZ = EditorGUILayout.FloatField ("Size Z:", m.sizeZ);
-		m.subdivisionsPerSecond = EditorGUILayout.FloatField("Subdivisions Per Second", m.subdivisionsPerSecond);
+		m.subdivisionsPerSecond = EditorGUILayout.FloatField("Subdivisions/sec:", m.subdivisionsPerSecond);
 		
+		GUILayout.Label("");
+		GUILayout.Label("Only add primitives using the buttons below. The active selection will be set automatically to the created primitive.");
+		
+		GUILayout.Label("");
+		GUILayout.Label("Obstacle", EditorStyles.boldLabel);
+		GUILayout.Label("An obstacle that can be moved, rotated, and scaled around.");
 		if (GUILayout.Button("Add Obstacle")) {
 			GameObject go = new GameObject();
 			go.transform.parent = m.transform;
@@ -24,6 +33,9 @@ public class MapEditor : Editor {
 			Selection.activeTransform = go.transform;
 		}
 		
+		GUILayout.Label("");
+		GUILayout.Label("Guards", EditorStyles.boldLabel);
+		GUILayout.Label("A guard for which the velocity is controlled piece-wise.");
 		if (GUILayout.Button("Add Coordinate Guard")) {
 			GameObject go = new GameObject();
 			go.transform.parent = m.transform;
@@ -31,6 +43,7 @@ public class MapEditor : Editor {
 			Selection.activeTransform = go.transform;
 		}
 		
+		GUILayout.Label("A guard for which the position is controlled with waypoints.");
 		if (GUILayout.Button("Add Waypoint Guard")) {
 			GameObject go = new GameObject();
 			go.transform.parent = m.transform;
@@ -38,6 +51,9 @@ public class MapEditor : Editor {
 			Selection.activeTransform = go.transform;
 		}
 		
+		GUILayout.Label("");
+		GUILayout.Label("Camera", EditorStyles.boldLabel);
+		GUILayout.Label("A camera for which the rotation is regular.");
 		if (GUILayout.Button("Add Camera")) {
 			GameObject go = new GameObject();
 			go.transform.parent = m.transform;
@@ -45,13 +61,16 @@ public class MapEditor : Editor {
 			Selection.activeTransform = go.transform;
 		}
 		
+		GUILayout.Label("");
+		GUILayout.Label("Players", EditorStyles.boldLabel);
+		GUILayout.Label("A player for which the velocity is controlled piece-wise.");
 		if (GUILayout.Button("Add Coordinate Player")) {
 			GameObject go = new GameObject();
 			go.transform.parent = m.transform;
 			go.AddComponent("StealthCoordPlayer");
 			Selection.activeTransform = go.transform;
 		}
-		
+		GUILayout.Label("A player for which the position is controlled with waypoints.");
 		if (GUILayout.Button("Add Waypoint Player")) {
 			GameObject go = new GameObject();
 			go.transform.parent = m.transform;

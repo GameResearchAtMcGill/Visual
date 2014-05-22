@@ -102,8 +102,7 @@ public class StealthCamera : StealthFov {
 		for (int i = 0; i < numSub; i++) {
 			Gizmos.color = new Color (1.0f, 0.1f, 0.2f);
 			
-			Shape3 vision = StealthFov.Vertices(viewDistance, fieldOfView, frontSegments, position + new Vector3(0, time, 0), rot + rotation);
-			shLst.Add (StealthFov.Occlude(map, vision, position + new Vector3(0, time, 0), viewDistance));
+			shLst.Add (Occlude(position + new Vector3(0, time, 0), rot + rotation));
 			
 			if (type == Type.Rotating) {
 				if (motion == Motion.Turning) {
@@ -179,7 +178,6 @@ public class StealthCamera : StealthFov {
 	}
 	
 	new public void Validate() {
-		position.y = 0;
 		
 		if (amplitude < 0.001f) {
 			amplitude = 0.001f;
@@ -188,9 +186,6 @@ public class StealthCamera : StealthFov {
 			pause = 0;
 		}
 		
-		if (dirty) {
-			UpdateMesh();
-			dirty = false;
-		}
+		base.Validate();
 	}
 }

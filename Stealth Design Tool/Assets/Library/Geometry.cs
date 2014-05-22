@@ -9,7 +9,58 @@ using System.Collections.Generic;
 public struct Edge3Abs {
 	public Vector3 a;
 	public Vector3 b;
-
+	
+	public Vector3 rightNormal {
+		get {
+			return (new Vector3(-(b.z - a.z), 0, b.x - a.x)).normalized;
+		}
+	}
+	
+	public Vector3 leftNormal {
+		get {
+			return (new Vector3(b.z - a.z, 0, -(b.x - a.x))).normalized;
+		}
+	}
+	
+	public bool rightOf(Vector3 v) {
+		return Vector3.Cross(v - a, b - a).y < 0;
+	}
+	
+	public bool leftOf(Vector3 v) {
+		return Vector3.Cross(v - a, b - a).y > 0;
+	}
+	
+	public Vector3 middle {
+		get {
+			return 0.5f*(b + a);
+		}
+	}
+	
+	public Vector3 closest(Vector3 point) {
+		// Find point on edge closest to PoV
+		float proj_v = Vector3.Dot(point - a, (b - a).normalized);
+		Vector3 closest;
+		if (proj_v < 0)
+			closest = a;
+		else if (proj_v > (b - a).magnitude)
+			closest = b;
+		else {
+			closest = a + proj_v * (b - a).normalized;
+		}
+		return closest;
+	}
+	
+	public Vector3 furthest(Vector3 point) {
+		float da = Vector3.Distance(point, a);
+		float db = Vector3.Distance(point, b);
+		
+		if (da > db){
+			return a;
+		} else {
+			return b;
+		}
+	}
+	
 	public Edge3Abs(Vector3 a, Vector3 b)
 	{
 		this.a = a;
@@ -25,6 +76,7 @@ public struct Edge3Abs {
 	public Vector3 GetDiff() {
 		return b - a;
 	}
+	
 
 	/**
 	 * Performs an intersection test in 2D on the XZ between two line segments.
@@ -45,13 +97,16 @@ public struct Edge3Abs {
 			return new Vector3 (float.NaN, float.NaN, float.NaN);
 
 		float xi = ((q1.x-q2.x)*(p1.x*p2.z-p1.z*p2.x)-(p1.x-p2.x)*(q1.x*q2.z-q1.z*q2.x))/d;
-
-		if (xi < Mathf.Min (p1.x, p2.x) || xi > Mathf.Max (p1.x, p2.x))
-			return new Vector3 (float.NaN, float.NaN, float.NaN);
-		if (xi < Mathf.Min (q1.x, q2.x) || xi > Mathf.Max (q1.x, q2.x))
-			return new Vector3 (float.NaN, float.NaN, float.NaN);
-
 		float yi = ((q1.z-q2.z)*(p1.x*p2.z-p1.z*p2.x)-(p1.z-p2.z)*(q1.x*q2.z-q1.z*q2.x))/d;
+
+		if (xi + 1e-4 < Mathf.Min (p1.x, p2.x) || xi - 1e-4 > Mathf.Max (p1.x, p2.x))
+			return new Vector3 (float.NaN, float.NaN, float.NaN);
+		if (xi + 1e-4 < Mathf.Min (q1.x, q2.x) || xi - 1e-4 > Mathf.Max (q1.x, q2.x))
+			return new Vector3 (float.NaN, float.NaN, float.NaN);
+		if (yi + 1e-4 < Mathf.Min(p1.z, p2.z) || yi - 1e-4 > Mathf.Max(p1.z, p2.z))
+			return new Vector3 (float.NaN, float.NaN, float.NaN);
+		if (yi + 1e-4 < Mathf.Min(q1.z, q2.z) || yi - 1e-4 > Mathf.Max(q1.z, q2.z))
+			return new Vector3 (float.NaN, float.NaN, float.NaN);
 
 		return new Vector3 (xi, a.y, yi);
 	}
@@ -271,6 +326,115 @@ public class Shape3: IEnumerable {
 		}
 	}
 	
+	public void translate(Vector3 t) {
+		List<Vector3> l = new List<Vector3>();
+		foreach (Vector3 v in vertices) {
+			l.Add(v + t);
+		}
+		vertices = l;
+	}
+	
+	public void rotatedScale(Vector3 o, float rotation, Vector3 scale) {
+		List<Vector3> l = new List<Vector3>();
+		
+		Quaternion qinv = Quaternion.Euler(0, -rotation,0 );
+		Quaternion q = Quaternion.Euler(0, rotation, 0);
+		
+		Vector3 v2;
+		foreach (Vector3 v in vertices) {
+			v2 = v - o; // Un-translate
+			v2 = qinv * v2; // Un-rotate
+			
+			// Scale
+			v2.x *= scale.x;
+			v2.y *= scale.y;
+			v2.z *= scale.z;
+			
+			v2 = q * v2; // Re-rotate
+			v2 += o; // Re-translate
+			
+			l.Add(v2);
+		}
+		
+		vertices = l;
+	}
+	
+	// Only works in specific cases, not robust!
+	public Shape3[] splitInTwo(Vector3 o, Vector3 dir) {
+		if (PointInside(o))
+			return null;
+		
+		// Find farthest point
+		float farthest = (vertices[0] - o).sqrMagnitude;
+		foreach (Vector3 v in vertices) {
+			float dst = (v - o).sqrMagnitude;
+			if (dst > farthest) {
+				farthest = dst;
+			}
+		}
+		
+		// Split edge
+		Edge3Abs spl = new Edge3Abs(o, o + dir.normalized * Mathf.Sqrt(farthest)*1.2f);
+		
+		// New halves
+		Shape3 first = new Shape3();
+		Shape3 second = new Shape3();
+		
+		
+		int iCls = -1, iFar = -1;
+		Vector3 intCls = Vector3.zero, intFar = Vector3.zero, inter = Vector3.zero;
+		
+		int i = 0;
+		foreach (Edge3Abs e in this) {
+			inter = e.IntersectXZ(spl);
+			
+			if (!float.IsNaN(inter.x)) {
+				if (iCls == -1) {
+					iCls = i;
+					intCls = inter;
+				} else {
+					iFar = i;
+					intFar = inter;
+					break;
+				}
+			}
+			i++;
+		}
+		
+		// Swap if wrong
+		if ((intFar - o).sqrMagnitude < (intCls - o).sqrMagnitude) {
+			i = iCls;
+			iCls = iFar;
+			iFar = i;
+			
+			inter = intCls;
+			intCls = intFar;
+			intFar = inter;
+		}
+		
+		// First half
+		first.addVertex(intCls);
+		i = (iCls + 1) % vertices.Count;
+		while (i != (iFar + 1) % vertices.Count) {
+			first.addVertex(vertices[i]);
+			i = (i + 1) % vertices.Count;
+		}
+		first.addVertex(intFar);
+		first.Offset(-2);
+		
+		// Second half
+		second.addVertex(intCls);
+		second.addVertex(intFar);
+		i = (iFar + 1) % vertices.Count;
+		while (i != (iCls + 1) % vertices.Count) {
+			second.addVertex(vertices[i]);
+			i = (i + 1) % vertices.Count;
+		}
+		second.Offset(2);
+		
+		return new Shape3[]{first, second};
+	}
+	
 	public Circle BoundingCircle() {
 		Circle ret = new Circle();
 		
@@ -291,8 +455,10 @@ public class Shape3: IEnumerable {
 	}
 	
 	public void addVertex(Vector3 vert) {
-		hand = Handedness.Unknown;
-		vertices.Add (vert);
+		if (vertices.Count == 0 || vertices[vertices.Count-1] != vert) {
+			hand = Handedness.Unknown;
+			vertices.Add (vert);
+		}
 	}
 
 	public void Clear() {
@@ -383,6 +549,7 @@ public class Shape3: IEnumerable {
 }
 
 public class SetOfPoints {
+	
 	public HashSet<Vector3> points;
 	Shape3 hull;
 	bool dirty;
@@ -395,12 +562,24 @@ public class SetOfPoints {
 	
 	public void AddPoint(Vector3 point)
 	{
-		points.Add(point);
-		dirty = true;
+		if (float.IsNaN(point.x) || float.IsNaN(point.y) || float.IsNaN(point.z)) {
+			Debug.Log("NaN");
+			return;
+		}
+		if (float.IsInfinity(point.x) || float.IsInfinity(point.y) || float.IsInfinity(point.z)) {
+			Debug.Log("Inf");
+			return;
+		}
+		point.y = 0;
+		if (!points.Contains(point)) {
+			points.Add(point);
+			dirty = true;
+		}
 	}
 	
 	public Shape3 ConvexHull()
 	{
+		// TODO: Infinite loop lurking around here
 		if (dirty) {
 			List<Vector3> ptList = points.ToList();
 			hull.Clear();
@@ -420,17 +599,16 @@ public class SetOfPoints {
 				hull.addVertex(pointOnHull);
 				endpoint = ptList[0];
 				for (int j = 1; j < ptList.Count; j++) {
-					if (pointOnHull == endpoint || leftOfLine(ptList[j], pointOnHull, endpoint)) {
+					if (Vector3.Distance(pointOnHull, endpoint) < 1e-4 || leftOfLine(ptList[j], pointOnHull, endpoint)) {
 						endpoint = ptList[j];
 					}
 				}
 				pointOnHull = endpoint;
-			} while (start != endpoint);
+			} while (Vector3.Distance(start, endpoint) >= 1e-4);
 			dirty = false;
-			return hull;
-		} else {
-			return hull;
 		}
+		
+		return hull;
 	}
 	
 	private static Vector3 LeftMost(List<Vector3> points) {

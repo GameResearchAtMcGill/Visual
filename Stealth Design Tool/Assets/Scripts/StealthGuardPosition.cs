@@ -101,7 +101,7 @@ public class StealthGuardPosition : MonoBehaviour {
 	}
 
 	private void Gizmo() {
-		Shape3 shape = StealthFov.Vertices(guard.viewDistance, guard.fieldOfView, guard.frontSegments, position, rotation);
+		Shape3 shape = guard.Vertices(position, rotation);
 		
 		foreach (Edge3Abs e in shape) {
 			Gizmos.DrawLine(e.a, e.b);

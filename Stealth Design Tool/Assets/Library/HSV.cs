@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class HSV {
 
-	public static Color Color(float h, float s, float v, float a=1.0f) {
+	public static Color Color(float h, float s, float v, float a) {
 		h = (h % 360 + 360) % 360;
 		if (s < 0)
 			s = 0;

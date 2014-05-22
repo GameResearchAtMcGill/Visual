@@ -3,6 +3,8 @@ using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 
+// TODO: Fix off-by-one bug
+
 [ExecuteInEditMode]
 public class AccessibilitySurface : MeshMapChild {
 	public StealthPlayer player;
@@ -138,8 +140,8 @@ public class AccessibilitySurface : MeshMapChild {
 	
 	public float[, ] Wavefront()
 	{
-		int width = Mathf.CeilToInt(map.dimensions.x*density_);
-		int height = Mathf.CeilToInt(map.dimensions.z*density_);
+		int width = Mathf.CeilToInt(map.dimensions.x*density_)+1;
+		int height = Mathf.CeilToInt(map.dimensions.z*density_)+1;
 		
 		int offX = Mathf.CeilToInt(width / 2f);
 		int offY = Mathf.CeilToInt(height / 2f);

@@ -20,6 +20,7 @@ public class StealthCameraEditor : Editor {
 			c.amplitude = EditorGUILayout.FloatField ("Amplitude", c.amplitude);
 		c.viewDistance = EditorGUILayout.FloatField ("View Distance", c.viewDistance);
 		c.fieldOfView = EditorGUILayout.FloatField ("Field of View", c.fieldOfView);
+		c.frontSegments = EditorGUILayout.IntField("Front segments:", c.frontSegments);
 		c.pause = EditorGUILayout.FloatField ("Pause", c.pause);
 	}
 

@@ -15,6 +15,10 @@ public class StealthCoordGuardEditor : Editor {
 	
 	public override void OnInspectorGUI()
 	{
+		GUI.skin.label.wordWrap = true;
+		
+		GUILayout.Label("Coordinate Guard Parameters", EditorStyles.boldLabel);
+		
 		g.posX = EditorGUILayout.FloatField ("X Position:", g.posX);
 		g.posZ = EditorGUILayout.FloatField ("Z Position:", g.posZ);
 		g.rotation = EditorGUILayout.FloatField ("Rotation:", g.rotation);
@@ -24,17 +28,27 @@ public class StealthCoordGuardEditor : Editor {
 		g.maxSpeed = EditorGUILayout.FloatField("Max speed:", g.maxSpeed);
 		g.maxOmega = EditorGUILayout.FloatField("Max angular speed:", g.maxOmega);
 		
+		GUILayout.Label("");
+		GUILayout.Label("Move it, rotate it, or change the FoV, View Distance and Front Segments using the Tools in the editor, or the fields above.");
+		
+		GUILayout.Label("");
+		GUILayout.Label("To control motion, change the velocities of a particular coordinate. The velocities will be effective starting from the time of the coordinate.");
+		GUILayout.Label("To add a coordinate, click on the button below.");
+		GUILayout.Label("");
+		
+		GUILayout.Label("Coordinates", EditorStyles.boldLabel);
 		List<StealthGuardPosition> positions = g.getSGP ();
 		if (showCoordinate.Length < positions.Count) {
 			showCoordinate = new bool[positions.Count];
 		}
 		int ind = 0;
 		foreach (StealthGuardPosition gp in positions) {
-			if (showCoordinate[ind] = EditorGUILayout.Foldout(showCoordinate[ind], "Coordinate " + ind)) {
+			if (showCoordinate[ind] = EditorGUILayout.Foldout(showCoordinate[ind], "Coordinate " + ind + (ind == 0 ? " (Base)" : ""))) {
 				Vector2 vel = new Vector2(gp.velocity.x, gp.velocity.z);
 				vel = EditorGUILayout.Vector2Field("Velocity:", vel);
 				gp.velocity = new Vector3(vel.x, 1, vel.y);
-				gp.time = EditorGUILayout.FloatField("Time:", gp.time);
+				if (ind != 0)
+					gp.time = EditorGUILayout.FloatField("Time:", gp.time);
 				gp.omega = EditorGUILayout.FloatField("Omega", gp.omega);
 				
 				if (GUILayout.Button("Select")) {
@@ -98,13 +112,14 @@ public class StealthCoordGuardEditor : Editor {
 			}
 
 		} else if (lastTool == Tool.Scale) {
-			Vector3 result = Handles.ScaleHandle (new Vector3 (g.viewDistance, 1, g.fieldOfView),
+			Vector3 result = Handles.ScaleHandle (new Vector3 (g.viewDistance, g.frontSegments, g.fieldOfView),
 				                                      g.position, g.rotationQ,
 				                                      HandleUtility.GetHandleSize(g.position));
 
 			if (result != new Vector3(g.viewDistance, 1, g.fieldOfView)) {
 				g.viewDistance = result.x;
 				g.fieldOfView = result.z;
+				g.frontSegments = Mathf.RoundToInt(result.y);
 			}
 		}
 		

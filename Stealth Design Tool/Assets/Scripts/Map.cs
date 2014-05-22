@@ -63,17 +63,19 @@ public class Map : MonoBehaviour {
 	void Awake()
 	{
 		
-		PrefabUtility.DisconnectPrefabInstance(gameObject);
-		// Count number of maps
-		int mapID = GameObject.FindObjectsOfType(typeof(Map)).Length;
-		
-//		if (mapID > 1) {
-//			Debug.LogError("There can be only one map");
-//			Object.DestroyImmediate(gameObject);
-//		}
-		
-		gameObject.name = "Map " + (mapID);
+	}
+	
+	void Start ()
+	{
 
+	}
+	
+	void Reset()
+	{
+		PrefabUtility.DisconnectPrefabInstance(gameObject);
+		
+		gameObject.name = "Map";
+		
 		if (gameObject.GetComponent<MeshFilter> () == null)
 			gameObject.AddComponent ("MeshFilter");
 		if (gameObject.GetComponent<MeshRenderer> () == null)
@@ -85,11 +87,6 @@ public class Map : MonoBehaviour {
 		gameObject.renderer.material = mat;
 
 		CreateMesh ();
-	}
-
-	void Start ()
-	{
-
 	}
 
 	void Update ()

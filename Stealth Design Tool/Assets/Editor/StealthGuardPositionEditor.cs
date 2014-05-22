@@ -57,9 +57,9 @@ public class StealthGuardPositionEditor : Editor {
 
 		if (lastTool == Tool.Rotate) {
 			if (gp.before != null) {
-				Quaternion result = Handles.RotationHandle(Quaternion.Euler(0, gp.before.omega, 0), gp.position);
-				if (result.eulerAngles.y != gp.before.omega) {
-					gp.before.omega = result.eulerAngles.y;
+				Quaternion result = Handles.RotationHandle(Quaternion.Euler(0, gp.before.omega/gp.guard.maxOmega_, 0), gp.position);
+				if (result.eulerAngles.y*gp.guard.maxOmega_ != gp.before.omega) {
+					gp.before.omega = result.eulerAngles.y*gp.guard.maxOmega_;
 				}
 			} else {
 				Tools.current = Tool.None;

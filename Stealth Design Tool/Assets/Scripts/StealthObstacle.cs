@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
+using System.Collections.Generic;
 
 [ExecuteInEditMode]
 public class StealthObstacle : MeshMapChild, Obstacle {
@@ -32,17 +33,50 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 		}
 	}
 	
+	public float radius {
+		get {
+			return Mathf.Sqrt(0.25f*(sizeX*sizeX + sizeZ*sizeZ));
+		}
+	}
+	
+	private Shape3 s_;
+	private Shape3 s {
+		get {
+			if (s_ == null) {
+				s_ = new Shape3();
+			}
+			return s_;
+		}
+	}
+	
+	private Dictionary<Vector3, ShadowTuple> shadows_;
+	private Dictionary<Vector3, ShadowTuple> shadows {
+		get {
+			if (shadows_ == null) {
+				shadows_ = new Dictionary<Vector3, ShadowTuple>();
+			}
+			return shadows_;
+		}
+	}
+	
 	new protected void Awake()
 	{
 		base.Awake();
 		
+		if (gameObject.GetComponent<MeshCollider>() != null) {
+			Object.DestroyImmediate(gameObject.GetComponent<MeshCollider>());
+			MeshCollider mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
+			mc.convex = true;
+			mc.isTrigger = true;
+		}
+	}
+	
+	void Reset() {
 		if (gameObject.GetComponent<MeshCollider>() == null) {
 			MeshCollider mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
 			mc.convex = true;
 			mc.isTrigger = true;
 		}
-		
-		rotation = 1;
 		
 		obstacleID = map.GetObstacles ().Count;
 		gameObject.name = "Obstacle " + obstacleID;
@@ -56,7 +90,7 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 		Gizmos.color = new Color (0.5f, 0.5f, 0.5f);
 		Gizmos.matrix = Matrix4x4.TRS (position, rotationQ, Vector3.one);
 
-		Gizmos.DrawWireCube (new Vector3(0.0f, map.timeLength * 0.5f, 0.0f), dimensions);
+		//Gizmos.DrawWireCube (new Vector3(0.0f, map.timeLength * 0.5f, 0.0f), dimensions);
 	}
 	
 	public Vector3[] Vertices()
@@ -137,24 +171,30 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 		position.y = 0.0f;
 		
 		if (dirty) {
+			RefreshShapeCache();
 			dirty = false;
 			UpdateMesh();
 		}
 	}
 	
-	public Shape3 GetShape()
-	{
-		Shape3 ret = new Shape3();
-		ret.addVertex (rotationQ * new Vector3 (sizeX * 0.5f, 0, sizeZ * 0.5f) + position);
-		ret.addVertex (rotationQ * new Vector3(sizeX*0.5f, 0, -sizeZ*0.5f) + position);
-		ret.addVertex (rotationQ * new Vector3(-sizeX*0.5f, 0, -sizeZ*0.5f) + position);
-		ret.addVertex (rotationQ * new Vector3(-sizeX*0.5f, 0, sizeZ*0.5f) + position);
-		
-		return ret;
+	public void RefreshShapeCache() {
+		s.Clear();
+		s.addVertex (rotationQ * new Vector3 (sizeX * 0.5f, 0, sizeZ * 0.5f) + position);
+		s.addVertex (rotationQ * new Vector3(sizeX*0.5f, 0, -sizeZ*0.5f) + position);
+		s.addVertex (rotationQ * new Vector3(-sizeX*0.5f, 0, -sizeZ*0.5f) + position);
+		s.addVertex (rotationQ * new Vector3(-sizeX*0.5f, 0, sizeZ*0.5f) + position);
 	}
 	
-	public Shape3 ShadowPolygon(Vector3 viewpoint, float viewDistance)
-	{
+	public void OnEnable() {
+		RefreshShapeCache();
+	}
+	
+	public Shape3 GetShape()
+	{	
+			return s;
+	}
+	
+	private Shape3 ShadowPoly(Vector3 viewpoint, float viewDistance) {
 		Shape3 obsShape = new Shape3 ();
 
 		obsShape.addVertex (rotationQ * new Vector3(sizeX * 0.5f, viewpoint.y, sizeZ * 0.5f) + position);
@@ -224,6 +264,39 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 			}
 
 		}
+		shape.Offset(3);
 		return shape;
+		
+	}
+	
+	public Shape3 ShadowPolygon(Vector3 viewpoint, float viewDistance)
+	{
+		return ShadowPoly(viewpoint, viewDistance);
+		
+//		if (shadows.ContainsKey(viewpoint)) {
+//			if ((shadows[viewpoint]).dist >= viewDistance) {
+//				return (shadows[viewpoint]).shadow;
+//			}
+//		} else {
+//			if (shadows.Count > 100) {
+//				foreach (Vector3 v in shadows.Keys) {
+//					shadows.Remove(v);
+//					break;
+//				}
+//			}
+//		}
+//		ShadowTuple st = new ShadowTuple(ShadowPoly(viewpoint, viewDistance), viewDistance);
+//		shadows_[viewpoint] = st;
+//		return st.shadow;
+	}
+}
+
+public struct ShadowTuple {
+	public Shape3 shadow;
+	public float dist;
+	
+	public ShadowTuple(Shape3 s, float d) {
+		shadow = s;
+		dist = d;
 	}
 }

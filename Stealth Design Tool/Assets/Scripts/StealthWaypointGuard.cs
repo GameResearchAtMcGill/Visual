@@ -110,9 +110,6 @@ public class StealthWaypointGuard : StealthGuard, WaypointManagerListener {
 	new public void Validate() {
 		transform.position = Vector3.zero;
 
-		if (dirty) {
-			UpdateMesh ();
-			dirty = false;
-		}
+		base.Validate();
 	}
 }

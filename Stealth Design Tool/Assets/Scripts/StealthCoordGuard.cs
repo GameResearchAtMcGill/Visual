@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using System.Collections;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
@@ -11,10 +9,7 @@ public class StealthCoordGuard : StealthGuard {
 			AddCoordinate();
 		}
 		
-		
 		base.Awake();
-		
-		
 		
 		name = "CoordGuard " + guardID;
 	}
@@ -54,8 +49,6 @@ public class StealthCoordGuard : StealthGuard {
 		go.AddComponent ("StealthGuardPosition");
 
 		if (last != null) {
-			Debug.Log(last.time);
-			
 			StealthGuardPosition gp = go.GetComponent<StealthGuardPosition> ();
 			
 			gp.velocity = last.velocity;
@@ -91,11 +84,6 @@ public class StealthCoordGuard : StealthGuard {
 	}
 	
 	new public void Validate() {
-		position.y = 0;
-
-		if (dirty) {
-			UpdateMesh ();
-			dirty = false;
-		}
+		base.Validate();
 	}
 }

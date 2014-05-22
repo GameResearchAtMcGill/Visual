@@ -12,6 +12,10 @@ public class StealthObstacleEditor : Editor {
 	
 	public override void OnInspectorGUI()
 	{
+		GUI.skin.label.wordWrap = true;
+		
+		GUILayout.Label("Obstacle Parameters", EditorStyles.boldLabel);
+		
 		float result;
 		result = EditorGUILayout.FloatField ("X Position:", o.posX);
 		if (o.posX != result) {
@@ -43,6 +47,8 @@ public class StealthObstacleEditor : Editor {
 			o.map.dirty = true;
 			o.map.Validate();
 		}
+		
+		GUILayout.Label("Move it, rotate it, or scale it using the Tools in the editor, or the fields above.");
 	}
 	
 	Tool lastTool = Tool.None;
