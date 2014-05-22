@@ -4,10 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class StealthObstacle : MeshMapChild, Obstacle {
+public class StealthObstacle : MeshMapChild, IObstacle {
 	public Vector3 dimensions = new Vector3(10.0f, 10.0f, 10.0f);
 	
 	public int obstacleID;
+	new public Vector3 position {
+		get { return base.position; }
+	}
 	
 	public float sizeX
 	{
@@ -170,7 +173,7 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 			sizeZ = 0.1f;
 		
 		dimensions.y = map.timeLength;
-		position.y = 0.0f;
+		base.position.y = 0;
 		
 		if (dirty) {
 			RefreshShapeCache();

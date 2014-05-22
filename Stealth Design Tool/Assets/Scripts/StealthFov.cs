@@ -101,7 +101,7 @@ public abstract class StealthFov : MeshMapChild {
 //			Gizmos.DrawLine(e.a, e.b);
 //		}
 		
-		foreach (StealthObstacle so in map.GetObstacles()) {
+		foreach (IObstacle so in map.GetObstacles()) {
 			
 			if (fieldOfView_ > 180)
 				Gizmos.DrawLine(position, position + rotationQ * new Vector3(-viewDist_, 0, 0));
@@ -261,7 +261,8 @@ public abstract class StealthFov : MeshMapChild {
 		// Left handed iterator of the vision shape
 		IEnumerator visionIteratorLH = vision_.GetEnumerator ();
 		List<Shape3> clipping = new List<Shape3>();
-		foreach (StealthObstacle o in map.GetObstacles()) {
+		foreach (IObstacle o in map.GetObstacles()) {
+			
 			// Very broad phase
 			if (Vector3.Distance(o.position, new Vector3(position.x, 0, position.z)) > viewDist_ + Mathf.Sqrt(o.sizeX*o.sizeX+o.sizeZ*o.sizeZ)*0.5f) {
 				continue;

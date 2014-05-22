@@ -149,7 +149,7 @@ public class AccessibilitySurface : MeshMapChild {
 		float[, ] ret = new float[width, height];
 		
 		// Draw the obstacles
-		foreach (StealthObstacle so in map.GetObstacles()) {
+		foreach (IObstacle so in map.GetObstacles()) {
 			Shape3 shape = so.GetShape();
 			
 			foreach(Edge3Abs e in shape) {

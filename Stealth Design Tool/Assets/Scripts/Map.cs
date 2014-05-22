@@ -3,12 +3,20 @@ using UnityEditor;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class Map : MonoBehaviour {
+public class Map : MonoBehaviour, IObstacle {
 	public bool dirty = true;
 
 	public Vector3 dimensions = new Vector3 (100.0f, 60.0f, 100.0f);
 	public float sub_ = 1;
 
+	public Vector3 position {
+		get { return Vector3.zero; }
+	}
+	
+	public float rotation {
+		get { return 0.0f; }
+	}
+	
 	public float sizeX
 	{
 		get { return dimensions.x; }
@@ -159,15 +167,16 @@ public class Map : MonoBehaviour {
 		return lst;
 	}
 
-	public List<StealthObstacle> GetObstacles()
+	public List<IObstacle> GetObstacles()
 	{
-		List<StealthObstacle> lst = new List<StealthObstacle>();
+		List<IObstacle> lst = new List<IObstacle>();
 		
 		foreach (Transform child in gameObject.transform) {
 			if (child.GetComponent<StealthObstacle>()) {
 				lst.Add(child.GetComponent<StealthObstacle>());
 			}
 		}
+		lst.Add(this);
 		
 		return lst;
 	}
@@ -250,5 +259,18 @@ public class Map : MonoBehaviour {
 			mc.dirty = true;
 			mc.Validate();
 		}
+	}
+	
+	public Shape3 GetShape() {
+		Shape3 ret = new Shape3();
+		ret.AddVertex(new Vector3( sizeX*0.5f+1e-2f, 0, sizeZ*0.5f+1e-2f));
+		ret.AddVertex(new Vector3( sizeX*0.5f+1e-2f, 0,-sizeZ*0.5f-1e-2f));
+		ret.AddVertex(new Vector3(-sizeX*0.5f-1e-2f, 0,-sizeZ*0.5f-1e-2f));
+		ret.AddVertex(new Vector3(-sizeX*0.5f-1e-2f, 0, sizeZ*0.5f+1e-2f));
+		return ret;
+	}
+	
+	public Shape3 ShadowPolygon(Vector3 viewpoint, float viewDistance){
+		return GetShape();
 	}
 }
