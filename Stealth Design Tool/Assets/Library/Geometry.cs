@@ -363,6 +363,7 @@ public class Shape3: IEnumerable
 			foreach (Edge3Abs e in temp) {
 				Vector3 previous = e.a;
 				Vector3 current = e.b;
+				
 				bool prvIns = Geometry.isLeft(boundary.b, boundary.a, previous);
 				bool curIns = Geometry.isLeft(boundary.b, boundary.a, current);
 				

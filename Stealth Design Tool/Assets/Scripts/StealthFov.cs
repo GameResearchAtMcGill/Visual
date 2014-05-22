@@ -106,34 +106,6 @@ public abstract class StealthFov : MeshMapChild {
 			if (fieldOfView_ > 180)
 				Gizmos.DrawLine(position, position + rotationQ * new Vector3(-viewDist_, 0, 0));
 			
-			bool inside = false;
-			if (so.GetShape().PointInside(position)) {
-				inside = true;
-				Quaternion soRot = so.rotationQ;
-				Shape3[] shadows = new Shape3[]{
-					so.ShadowPolygon(position + soRot* new Vector3(so.sizeX, 0, 0), viewDist_),
-					so.ShadowPolygon(position + soRot* new Vector3(0, 0, so.sizeZ), viewDist_),
-					so.ShadowPolygon(position + soRot* new Vector3(-so.sizeX, 0, 0), viewDist_),
-					so.ShadowPolygon(position + soRot* new Vector3(0, 0, -so.sizeZ), viewDist_),
-				};
-				shadows[0].Translate(soRot* new Vector3(-so.sizeX, 0, 0));
-				shadows[0].RotatedScale(so.position, so.rotation, new Vector3(1, 1, 1.2f));
-				shadows[1].Translate(soRot* new Vector3(0, 0, -so.sizeZ));
-				shadows[1].RotatedScale(so.position, so.rotation, new Vector3(1.2f, 1, 1));
-				shadows[2].Translate(soRot* new Vector3(so.sizeX, 0, 0));
-				shadows[2].RotatedScale(so.position, so.rotation, new Vector3(1, 1, 1.2f));
-				shadows[3].Translate(soRot* new Vector3(0, 0, so.sizeZ));
-				shadows[3].RotatedScale(so.position, so.rotation, new Vector3(1.2f, 1, 1));
-				
-				Gizmos.color = new Color32(255, 128, 0, 255);
-				foreach (Shape3 sh in shadows) {
-					foreach (Edge3Abs e in sh) {
-						Gizmos.DrawLine(e.a, e.b);
-					}
-					Gizmos.DrawSphere(sh[1], 0);
-				}
-			}
-			
 			
 			bool cont = true;
 			foreach (Edge3Abs e in so.GetShape()) {
@@ -153,7 +125,7 @@ public abstract class StealthFov : MeshMapChild {
 				Gizmos.DrawLine(e.a, e.b);
 			}
 			
-			if (!cont && !inside && fieldOfView_ > 180) {
+			if (!cont && !so.GetShape().PointInside(position) && fieldOfView_ > 180) {
 				Gizmos.color = Color.red;
 				foreach (Shape3 sp2 in sp.SplitInTwo(position, rotationQ * new Vector3(-1, 0, 0))) {
 					foreach (Edge3Abs e in sp2) {
@@ -266,22 +238,6 @@ public abstract class StealthFov : MeshMapChild {
 	}
 	
 	public abstract List<Shape3> Shapes();
-	/*{
-		List<Shape3> shLst = new List<Shape3> ();
-		
-		float tm = 0.0f;
-		int numSub = Mathf.FloorToInt(map.timeLength * map.sub_);
-		float timeStep = map.timeLength / numSub;
-		
-		for (int i = 0; i < numSub; i++) {
-			Shape3 vision = Vertices(viewDist_, fieldOfView_, frontSegments_, position + new Vector3(0, tm, 0), rotationQ.eulerAngles.y);
-			shLst.Add (Occlude(map, vision, position + new Vector3(0, tm, 0), viewDist_));
-			
-			tm += timeStep;
-		}
-		
-		return shLst;
-	} */
 	
 	private float ToTheta(Vector3 p) {
 		Vector3 diff = new Vector3(p.x - position.x, 0, p.z - position.z);
@@ -304,7 +260,7 @@ public abstract class StealthFov : MeshMapChild {
 
 		// Left handed iterator of the vision shape
 		IEnumerator visionIteratorLH = vision_.GetEnumerator ();
-
+		List<Shape3> clipping = new List<Shape3>();
 		foreach (StealthObstacle o in map.GetObstacles()) {
 			// Very broad phase
 			if (Vector3.Distance(o.position, new Vector3(position.x, 0, position.z)) > viewDist_ + Mathf.Sqrt(o.sizeX*o.sizeX+o.sizeZ*o.sizeZ)*0.5f) {
@@ -324,75 +280,7 @@ public abstract class StealthFov : MeshMapChild {
 			Shape3[] shadows = null;
 			// Treat an obstacle surrounding the fov as 4 obstacles
 			if (o.GetShape().PointInside(position)) {
-				Quaternion soRot = o.rotationQ;
-				
-				List<Shape3> shList = new List<Shape3>();
-				
-				int i = 0;
-				foreach (Edge3Abs e in o.GetShape()) {
-					
-					Vector3 cls = e.closest(new Vector3(position.x, 0, position.z));
-					float theta1 = ToTheta(e.a)*Mathf.Rad2Deg;
-					float theta2 = ToTheta(e.b)*Mathf.Rad2Deg;
-					
-					// If the edge is significant
-					// TODO: Fix the pruning
-					if (true || !(theta1 > fieldOfView_*0.5f && theta1 < -fieldOfView_*0.5f) && ToDist(cls) <= viewDist_) {
-						
-						Shape3 s = null;
-						
-						switch(i) {
-							case 0:
-								s = o.ShadowPolygon(position + soRot* new Vector3(-o.sizeX, -position.y, 0), viewDist_*2);
-								s.Translate(soRot* new Vector3(o.sizeX, position.y, 0));
-								s.RotatedScale(o.position, o.rotation, new Vector3(1, 1, 1.2f));
-								break;
-							case 1:
-								s = o.ShadowPolygon(position + soRot* new Vector3(0, -position.y, o.sizeZ), viewDist_*2);
-								s.Translate(soRot* new Vector3(0, position.y, -o.sizeZ));
-								s.RotatedScale(o.position, o.rotation, new Vector3(1.2f, 1, 1));
-								break;
-							case 2:
-								s = o.ShadowPolygon(position + soRot* new Vector3(o.sizeX, -position.y, 0), viewDist_*2);
-								s.Translate(soRot* new Vector3(-o.sizeX, position.y, 0));
-								s.RotatedScale(o.position, o.rotation, new Vector3(1, 1, 1.2f));
-								break;
-							case 3:
-								s = o.ShadowPolygon(position + soRot* new Vector3(0, -position.y, -o.sizeZ), viewDist_*2);
-								s.Translate(soRot* new Vector3(0, position.y, o.sizeZ));
-								s.RotatedScale(o.position, o.rotation, new Vector3(1.2f, 1, 1));
-								break;
-						}
-						// Split edge test
-						if (fieldOfView_ > 180) {
-							Vector3 inter;
-							Edge3Abs first = new Edge3Abs(position, position + Quaternion.Euler(0, rotation + fieldOfView_ * 0.5f, 0) * new Vector3(viewDist_*1.2f, 0, 0));
-							inter = first.IntersectXZ(e);
-							if (!float.IsNaN(inter.x)) {
-								first = new Edge3Abs(position, position + Quaternion.Euler(0, rotation - fieldOfView_ * 0.5f, 0) * new Vector3(viewDist_*1.2f, 0, 0));
-								inter = first.IntersectXZ(e);
-								if (!float.IsNaN(inter.x)) {
-									shadows = s.SplitInTwo(position, rotationQ * new Vector3(-1*viewDist_, 0, 0));
-									shList.Add(shadows[0]);
-									shList.Add(shadows[1]);
-								} else {
-									shList.Add(s);
-								}
-							} else {
-								shList.Add(s);
-							}
-						}
-						 else {
-							shList.Add(s);
-						}
-						
-					}
-					i++;
-				}
-				
-				shadows = new Shape3[shList.Count];
-				shList.CopyTo(shadows);
-				
+				clipping.Add(o.GetShape());
 			} else {
 				shadows = new []{o.ShadowPolygon(position, viewDist_)};
 				
@@ -416,7 +304,7 @@ public abstract class StealthFov : MeshMapChild {
 					}
 					
 					if (shouldSplit) {
-						Shape3[] temp = o.ShadowPolygon(position, viewDist_).SplitInTwo(position, rotationQ * new Vector3(-1*viewDist_, 0, 0));
+						Shape3[] temp = o.ShadowPolygon(position, viewDist_).SplitInTwo(position, Quaternion.Euler(0, rotation, 0) * new Vector3(-1*viewDist_, 0, 0));
 						if (temp != null)
 							shadows = temp;
 						else {
@@ -428,7 +316,30 @@ public abstract class StealthFov : MeshMapChild {
 				
 			}
 			
+			if (shadows == null) {
+				continue;
+			}
+			
 			foreach (Shape3 shadow in shadows) {
+				if (shadow.PointInside(position)) {
+					vision_ = vision_.Clip(shadow);
+					
+					int offset = -1;
+					for (int i = 0; i < vision_.Count; i++) {
+						Vector3 v = vision_[i];
+						v.y = position.y;
+						vision_[i] = v;
+						
+						if (v == position) {
+							offset = i;
+						}
+					}
+					// Clip will stride the shape, but the center should be at 0
+					vision_.Offset(offset);
+					
+					continue;
+				}
+				
 				// Occluded shape
 				Shape3 occludedLeft = new Shape3 ();
 				
@@ -514,7 +425,24 @@ public abstract class StealthFov : MeshMapChild {
 				visionIteratorLH = vision_.GetEnumerator ();
 			}
 		}
-
+		
+		foreach (Shape3 clip in clipping) {
+			vision_ = vision_.Clip(clip);
+		}
+		
+		if (clipping.Count > 0) {
+			int offset = -1;
+			for (int i = 0; i < vision_.Count; i++) {
+				Vector3 v = vision_[i];
+				v.y = position.y;
+				vision_[i] = v;
+				if (v == position) {
+					offset = i;
+				}
+			}
+			vision_.Offset(offset);
+		}
+		
 		return vision_;
 	}
 	
@@ -562,8 +490,8 @@ public abstract class StealthFov : MeshMapChild {
 		if (fieldOfView_ < 1f) {
 			fieldOfView_ = 1f;
 		}
-		if (fieldOfView_ > 179) {
-			fieldOfView_ = 179f;
+		if (fieldOfView_ > 359) {
+			fieldOfView_ = 359f;
 		}
 		
 		if (frontSegments_ < Mathf.CeilToInt(fieldOfView_/90)) {

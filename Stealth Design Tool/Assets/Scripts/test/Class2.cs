@@ -6,7 +6,7 @@ public class Class2 : MonoBehaviour {
 	
 	public void OnDrawGizmos() {
 		Shape3 clipper = new Shape3();
-		Quaternion q = Quaternion.Euler(0, 0, 0);
+		Quaternion q = Quaternion.Euler(0, 20, 0);
 		clipper.AddVertex(q * new Vector3(10, 0, 10));
 		clipper.AddVertex(q * new Vector3(10, 0, -10));
 		clipper.AddVertex(q * new Vector3(-10, 0, -10));
