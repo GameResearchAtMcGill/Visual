@@ -364,12 +364,12 @@ public abstract class StealthFov : MeshMapChild {
 								break;
 						}
 						// Split edge test
-						if (fieldOfView_ > 180 ) {
+						if (fieldOfView_ > 180) {
 							Vector3 inter;
-							Edge3Abs first = vision_.GetEdge(0);
+							Edge3Abs first = new Edge3Abs(position, position + Quaternion.Euler(0, rotation + fieldOfView_ * 0.5f, 0) * new Vector3(viewDist_*1.2f, 0, 0));
 							inter = first.IntersectXZ(e);
 							if (!float.IsNaN(inter.x)) {
-								first = vision_.GetEdge(vision_.Count - 1);
+								first = new Edge3Abs(position, position + Quaternion.Euler(0, rotation - fieldOfView_ * 0.5f, 0) * new Vector3(viewDist_*1.2f, 0, 0));
 								inter = first.IntersectXZ(e);
 								if (!float.IsNaN(inter.x)) {
 									shadows = s.splitInTwo(position, rotationQ * new Vector3(-1*viewDist_, 0, 0));
@@ -562,8 +562,8 @@ public abstract class StealthFov : MeshMapChild {
 		if (fieldOfView_ < 1f) {
 			fieldOfView_ = 1f;
 		}
-		if (fieldOfView_ > 359f) {
-			fieldOfView_ = 359f;
+		if (fieldOfView_ > 179) {
+			fieldOfView_ = 179f;
 		}
 		
 		if (frontSegments_ < Mathf.CeilToInt(fieldOfView_/90)) {
