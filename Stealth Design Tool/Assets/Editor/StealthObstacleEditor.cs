@@ -14,6 +14,8 @@ public class StealthObstacleEditor : Editor {
 	{
 		GUI.skin.label.wordWrap = true;
 		
+		GUILayout.Label("An obstacle is meant to represent an object that provides cover, but cannot move. Fields of view are occlued by obstacles.");
+		
 		GUILayout.Label("Obstacle Parameters", EditorStyles.boldLabel);
 		
 		float result;

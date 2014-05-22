@@ -330,13 +330,14 @@ public abstract class StealthFov : MeshMapChild {
 				
 				int i = 0;
 				foreach (Edge3Abs e in o.GetShape()) {
-					// If the edge is significant
+					
 					Vector3 cls = e.closest(new Vector3(position.x, 0, position.z));
 					float theta1 = ToTheta(e.a)*Mathf.Rad2Deg;
 					float theta2 = ToTheta(e.b)*Mathf.Rad2Deg;
 					
-					
-					if (!(theta1 > fieldOfView_*0.5f&& theta1 < -fieldOfView_*0.5f) && ToDist(cls) <= viewDist_) {
+					// If the edge is significant
+					// TODO: Fix the pruning
+					if (true || !(theta1 > fieldOfView_*0.5f && theta1 < -fieldOfView_*0.5f) && ToDist(cls) <= viewDist_) {
 						
 						Shape3 s = null;
 						
@@ -363,20 +364,25 @@ public abstract class StealthFov : MeshMapChild {
 								break;
 						}
 						// Split edge test
-						Vector3 inter;
-						Edge3Abs first = vision_.GetEdge(0);
-						inter = first.IntersectXZ(e);
-						if (!float.IsNaN(inter.x)) {
-							first = vision_.GetEdge(vision_.Count - 1);
+						if (fieldOfView_ > 180 ) {
+							Vector3 inter;
+							Edge3Abs first = vision_.GetEdge(0);
 							inter = first.IntersectXZ(e);
 							if (!float.IsNaN(inter.x)) {
-								shadows = s.splitInTwo(position, rotationQ * new Vector3(-1*viewDist_, 0, 0));
-								shList.Add(shadows[0]);
-								shList.Add(shadows[1]);
+								first = vision_.GetEdge(vision_.Count - 1);
+								inter = first.IntersectXZ(e);
+								if (!float.IsNaN(inter.x)) {
+									shadows = s.splitInTwo(position, rotationQ * new Vector3(-1*viewDist_, 0, 0));
+									shList.Add(shadows[0]);
+									shList.Add(shadows[1]);
+								} else {
+									shList.Add(s);
+								}
 							} else {
 								shList.Add(s);
 							}
-						} else {
+						}
+						 else {
 							shList.Add(s);
 						}
 						

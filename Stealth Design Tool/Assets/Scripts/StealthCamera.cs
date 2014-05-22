@@ -74,8 +74,6 @@ public class StealthCamera : StealthFov {
 		
 		base.Awake();
 		
-		
-		
 		cameraID = map.GetCameras ().Count;
 		gameObject.name = "Camera " + cameraID;
 		

@@ -63,6 +63,8 @@ public class StealthObstacle : MeshMapChild, Obstacle {
 	{
 		base.Awake();
 		
+		shadows_ = new Dictionary<Vector3, ShadowTuple>();
+		
 		if (gameObject.GetComponent<MeshCollider>() != null) {
 			Object.DestroyImmediate(gameObject.GetComponent<MeshCollider>());
 			MeshCollider mc = (MeshCollider)gameObject.AddComponent("MeshCollider");

@@ -49,8 +49,8 @@ public class CsgTest : MonoBehaviour {
 	public void OnValidate() {
 		Debug.Log("validate");
 		
-		Model a = CSG.Sphere(Vector3.up*3, 10, 16, 8);
-		Model b = CSG.Sphere(position, 10, 16, 8);
+		Model a = CSG.Sphere(Vector3.up*3, 10, 8, 8);
+		Model b = CSG.Sphere(position, 10, 8, 8);
 		
 		switch(op) {
 			case Operation.DIFFERENCE:
