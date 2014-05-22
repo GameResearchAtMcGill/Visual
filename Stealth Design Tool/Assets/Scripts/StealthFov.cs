@@ -289,18 +289,14 @@ public abstract class StealthFov : MeshMapChild {
 				if (fieldOfView_ > 180) {
 					bool shouldSplit = false;
 					
-					Edge3Abs first = vision_.GetEdge(0);
-					Edge3Abs last = vision_.GetEdge(vision_.Count - 1);
+					Edge3Abs back = new Edge3Abs(position, position + (Quaternion.Euler(0, rotation, 0) * new Vector3(-viewDist_, 0, 0)));
 					Vector3 inter;
 					
 					foreach (Edge3Abs e in o.GetShape()) {
-						inter = e.IntersectXZ(first);
+						inter = e.IntersectXZ(back);
 						if (!float.IsNaN(inter.x)) {
-							inter = e.IntersectXZ(last);
-							if (!float.IsNaN(inter.x)) {
-								shouldSplit = true;
-								break;
-							}
+							shouldSplit = true;
+							break;
 						}
 					}
 					

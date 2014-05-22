@@ -492,7 +492,7 @@ public class Shape3: IEnumerable
 			second.AddVertex(vertices[i]);
 			i = (i + 1) % vertices.Count;
 		}
-		second.Offset(2);
+		second.Offset(3);
 		
 		return new Shape3[]{ first, second };
 	}
@@ -527,6 +527,7 @@ public class Shape3: IEnumerable
 
 	public void Offset(int offset)
 	{
+		if (vertices.Count == 0) return;
 		offset = ((offset % vertices.Count) + vertices.Count) % vertices.Count;
 		List<Vector3> newList = new List<Vector3>();
 
