@@ -637,14 +637,15 @@ public class SetOfPoints
 	public void AddPoint(Vector3 point)
 	{
 		if (float.IsNaN(point.x) || float.IsNaN(point.y) || float.IsNaN(point.z)) {
-			Debug.Log("NaN");
 			return;
 		}
 		if (float.IsInfinity(point.x) || float.IsInfinity(point.y) || float.IsInfinity(point.z)) {
-			Debug.Log("Inf");
 			return;
 		}
+		// Rounding to avoid the infinite loop
+		point.x = Mathf.Round(point.x * 100)*0.01f;
 		point.y = 0;
+		point.z = Mathf.Round(point.z * 100)*0.01f;
 		if (!points.Contains(point)) {
 			points.Add(point);
 			dirty = true;
@@ -653,7 +654,7 @@ public class SetOfPoints
 	
 	public Shape3 ConvexHull()
 	{
-		// TODO: Infinite loop lurking around here
+		// TODO: Infinite loop
 		if (dirty) {
 			List<Vector3> ptList = points.ToList();
 			hull.Clear();
@@ -673,12 +674,12 @@ public class SetOfPoints
 				hull.AddVertex(pointOnHull);
 				endpoint = ptList[0];
 				for (int j = 1; j < ptList.Count; j++) {
-					if (Vector3.Distance(pointOnHull, endpoint) < 1e-4 || leftOfLine(ptList[j], pointOnHull, endpoint)) {
+					if (pointOnHull == endpoint || leftOfLine(ptList[j], pointOnHull, endpoint)) {
 						endpoint = ptList[j];
 					}
 				}
 				pointOnHull = endpoint;
-			} while (Vector3.Distance(start, endpoint) >= 1e-4);
+			} while (start != endpoint);
 			dirty = false;
 		}
 		
@@ -688,12 +689,14 @@ public class SetOfPoints
 	private static Vector3 LeftMost(List<Vector3> points)
 	{
 		Vector3 leftMost = points[0];
-		float leftX = leftMost.x;
 		
 		foreach (Vector3 p in points) {
-			if (p.x < leftX) {
+			if (p.x < leftMost.x) {
 				leftMost = p;
-				leftX = p.x;
+			} else if (p.x == leftMost.x) {
+				if (p.z < leftMost.z) {
+					leftMost = p;
+				}
 			}
 		}
 		

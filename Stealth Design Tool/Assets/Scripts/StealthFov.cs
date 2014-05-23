@@ -58,8 +58,7 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public Shape3 convexHull {
 		get {
-			return null;
-			//return setOfPoints.ConvexHull();
+			return setOfPoints.ConvexHull();
 		}
 	}
 	
@@ -97,9 +96,9 @@ public abstract class StealthFov : MeshMapChild {
 		if (!debug) {
 			return;
 		}
-//		foreach (Edge3Abs e in setOfPoints.ConvexHull()) {
-//			Gizmos.DrawLine(e.a, e.b);
-//		}
+		foreach (Edge3Abs e in setOfPoints.ConvexHull()) {
+			Gizmos.DrawLine(e.a, e.b);
+		}
 		
 		foreach (IObstacle so in map.GetObstacles()) {
 			

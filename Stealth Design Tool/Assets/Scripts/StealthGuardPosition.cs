@@ -118,7 +118,7 @@ public class StealthGuardPosition : MonoBehaviour {
 
 	void OnDrawGizmosSelected()
 	{
-		Gizmos.color = new Color (1.0f, 1.0f, 1.0f);
+		Gizmos.color = new Color (0.6f, 1.0f, 0.8f);
 		Gizmo ();
 		Gizmos.color = new Color(0f, 1.0f, 0.5f, 1.0f);
 		Gizmos.DrawSphere(position, 1);

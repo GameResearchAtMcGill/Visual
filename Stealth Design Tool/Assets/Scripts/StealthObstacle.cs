@@ -83,7 +83,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 			mc.isTrigger = true;
 		}
 		
-		obstacleID = map.GetObstacles ().Count;
+		obstacleID = map.GetObstacles ().Count - 1;
 		gameObject.name = "Obstacle " + obstacleID;
 		
 		Material mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/ObstacleMat.mat", typeof(Material));
