@@ -428,7 +428,7 @@ public class Shape3: IEnumerable
 		Vector3 previous = start;
 		bool mayContinue = true;
 		do {
-			if (iter++ > 100) {
+			if (iter++ > vertices.Count*2) {
 				Debug.LogError("hit max");
 				return clipped;
 			}
