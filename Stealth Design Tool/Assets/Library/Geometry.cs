@@ -393,13 +393,15 @@ public class Shape3: IEnumerable
 	 * and returns the result. The shapes should be simple polygons.
 	 */ 
 	public Shape3 ClipOut(Shape3 clipper) {
+		int iter = 0;
 		// Make the shape clockwise
 		if (handedness != Handedness.Left) {
 			Reverse();
 		}
 		// Make the clipper counterclockwise
 		if (clipper.handedness != Handedness.Right) {
-			Reverse();
+			
+			clipper.Reverse();
 		}
 		
 		int ai = 0, bi = 0;
@@ -409,10 +411,11 @@ public class Shape3: IEnumerable
 		// Traverse the shape to find a vertex outside of the clipper
 		while (clipper.PointInside(start)) {
 			if (ai > vertices.Count) {
-				return null;
+				return new Shape3();
 			}
 			start = vertices[++ai];
 		}
+		
 		
 		clipped.AddVertex(start);
 		
@@ -423,48 +426,53 @@ public class Shape3: IEnumerable
 		Vector3 inter;
 		Vector3 current = start;
 		Vector3 previous = start;
+		bool mayContinue = true;
 		do {
-			int i = 0;
-			while (i < a.Count) {
-				current = a.vertices[(i + ai + 1) % a.Count];
-				Edge3Abs e = new Edge3Abs(previous, current);
-				
-				// Find the closest intersection in b
-				float closest = float.PositiveInfinity;
-				Vector3 cl = current;
-				int j = 0;
-				foreach (Edge3Abs f in b) {
-					inter = e.IntersectXZ(f);
-					if (!float.IsNaN(inter.x)) {
-						if ((previous - inter).sqrMagnitude < closest) {
-							closest = (previous - inter).sqrMagnitude;
-							cl = inter;
-							bi = j;
-						}
-					}
-					j++;
-				}
-				
-				// If there has been any intersection, add vertex and change shapes around
-				if (!float.IsInfinity(closest) && cl != previous) {
-					clipped.AddVertex(cl);
-					
-					Shape3 tempShape = a;
-					a = b;
-					b = tempShape;
-					
-					i = bi;
-					
-					previous = cl;
-				} else {
-					// Otherwise add the vertex and carry along
-					clipped.AddVertex(current);
-					previous = current;
-					i++;
-				}
+			if (iter++ > 100) {
+				Debug.LogError("hit max");
+				return clipped;
 			}
-		} while (current != start);
+			current = a.vertices[(ai + 1) % a.Count];
+			Edge3Abs e = new Edge3Abs(previous, current);
+			
+			// Find the closest intersection in b
+			float closest = float.PositiveInfinity;
+			Vector3 closestInter = current;
+			int j = 0;
+			foreach (Edge3Abs f in b) {
+				inter = e.IntersectXZ(f);
+				if (!float.IsNaN(inter.x)) {
+					if ((previous - inter).sqrMagnitude < closest && inter != previous) {
+						closest = (previous - inter).sqrMagnitude;
+						closestInter = inter;
+						bi = j;
+					}
+				}
+				j++;
+			}
+			
+			// If there has been any intersection, add vertex and change shapes around
+			if (!float.IsInfinity(closest)) {
+				clipped.AddVertex(closestInter);
+				
+				Shape3 t = a;
+				a = b;
+				b = t;
+				
+				ai = bi;
+				
+				previous = closestInter;
+				mayContinue = true;
+			} else {
+				// Otherwise add the vertex and carry along
+				if (current != start) clipped.AddVertex(current);
+				previous = current;
+				ai++;
+				mayContinue = false;
+			}
+		} while (current != start || mayContinue);
 		// I guess this will be an infinite loop with improper shapes
+		
 		
 		return clipped;
 	}

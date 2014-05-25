@@ -256,9 +256,7 @@ public abstract class StealthFov : MeshMapChild {
 		foreach (Edge3Abs e in Vertices(position, rotation)) {
 			vision_.AddVertex(e.a);
 		}
-
-		// Left handed iterator of the vision shape
-		IEnumerator visionIteratorLH = vision_.GetEnumerator ();
+		
 		List<Shape3> clipping = new List<Shape3>();
 		foreach (IObstacle o in map.GetObstacles()) {
 			
@@ -319,106 +317,23 @@ public abstract class StealthFov : MeshMapChild {
 			foreach (Shape3 shadow in shadows) {
 				if (shadow.PointInside(position)) {
 					vision_ = vision_.ClipIn(shadow);
+				} else {
+					vision_ = vision_.ClipOut(shadow);
+				}
+				
+				int offset = -1;
+				// Realign positions
+				for (int i = 0; i < vision_.Count; i++) {
+					Vector3 v = vision_[i];
+					v.y = position.y;
+					vision_[i] = v;
 					
-					int offset = -1;
-					for (int i = 0; i < vision_.Count; i++) {
-						Vector3 v = vision_[i];
-						v.y = position.y;
-						vision_[i] = v;
-						
-						if (v == position) {
-							offset = i;
-						}
-					}
-					// Clip will stride the shape, but the center should be at 0
-					vision_.Offset(offset);
-					
-					continue;
-				}
-				
-				// Occluded shape
-				Shape3 occludedLeft = new Shape3 ();
-				
-				// Right handed iterator of the shadow polygon
-				IEnumerator shadowIterator;
-	
-				Edge3Abs intersecting = new Edge3Abs(Vector3.zero, Vector3.zero);
-				while(visionIteratorLH.MoveNext()) {
-					Edge3Abs e = (Edge3Abs)visionIteratorLH.Current;
-	
-					occludedLeft.AddVertex(e.a);
-	
-					shadowIterator = shadow.GetReverseEnumerator();
-					float distance = float.PositiveInfinity;
-					while(shadowIterator.MoveNext()) {
-	
-						Edge3Abs se = (Edge3Abs)shadowIterator.Current;
-						Vector3 intersection;
-						if (!float.IsNaN((intersection = e.IntersectXZ(se)).x)) {
-							if (Vector3.Distance(e.a, intersection) < distance) {
-								distance = Vector3.Distance(e.a, intersection);
-								e.b = intersection;
-								occludedLeft.AddVertex(e.b);
-								intersecting = se;
-								intersecting.b = e.b;
-							}
-						}
-					}
-					if (intersecting.a != intersecting.b) {
-						break;
+					if (v == position) {
+						offset = i;
 					}
 				}
-				
-				// If an intersection occured
-				if (intersecting.a != intersecting.b) {
-					// Traverse the shadow shape right-handedly up to the intersection segment
-					shadowIterator = shadow.GetReverseEnumerator();
-					int offset = -1;
-					while (shadowIterator.MoveNext()) {
-						if (((Edge3Abs) shadowIterator.Current).b == intersecting.a) {
-							break;
-						}
-	
-						offset -= 1;
-					}
-					shadow.Offset(offset);
-					shadowIterator = shadow.GetReverseEnumerator();
-	
-					shadowIterator = shadow.GetReverseEnumerator();
-					while (shadowIterator.MoveNext()) {
-						Edge3Abs se = (Edge3Abs) shadowIterator.Current;
-	
-						visionIteratorLH = vision_.GetEnumerator();
-						bool intersect = false;
-						while (visionIteratorLH.MoveNext()) {
-							Edge3Abs e = (Edge3Abs) visionIteratorLH.Current;
-							Vector3 intersection = e.IntersectXZ(se);
-							if (!float.IsNaN (intersection.x) && intersecting.b != intersection) {
-								se.b = intersection;
-								occludedLeft.AddVertex(se.b);
-								intersect= true;
-								break;
-							}
-						}
-	
-						if (intersect)
-							break;
-						
-						occludedLeft.AddVertex (se.b);
-					}
-					
-					while(visionIteratorLH.MoveNext()) {
-						Edge3Abs e = (Edge3Abs)visionIteratorLH.Current;
-	
-						occludedLeft.AddVertex (e.a);
-					}
-				}
-				
-				vision_.Clear();
-				foreach (Edge3Abs e in occludedLeft) {
-					vision_.AddVertex(e.a);
-				}
-				visionIteratorLH = vision_.GetEnumerator ();
+				// Clip will offset the shape, but the center should be at 0
+				if (offset != -1) vision_.Offset(offset);
 			}
 		}
 		
