@@ -349,17 +349,20 @@ public class Shape3: IEnumerable
 	}
 	
 	
-	// Sutherland-Hodgman
-	public Shape3 Clip(Shape3 convex)
+	/**
+	 * Clip this shape so as to stay within a convex clipper using the
+	 * Sutherland-Hodgman clipping algorithm and returns the result.
+	 */ 
+	public Shape3 ClipIn(Shape3 convexClipper)
 	{
-		if (convex.handedness != handedness) {
-			convex.Reverse();
+		if (convexClipper.handedness != handedness) {
+			convexClipper.Reverse();
 		}
 		
 		Shape3 temp = this;
 		Shape3 clipped = new Shape3();
 		
-		foreach (Edge3Abs boundary in convex) {
+		foreach (Edge3Abs boundary in convexClipper) {
 			foreach (Edge3Abs e in temp) {
 				Vector3 previous = e.a;
 				Vector3 current = e.b;
@@ -383,6 +386,87 @@ public class Shape3: IEnumerable
 		}
 		
 		return temp;
+	}
+	
+	/**
+	 * Clip a clipper shape out of this shape using the Weiler-Atherton algorithm
+	 * and returns the result. The shapes should be simple polygons.
+	 */ 
+	public Shape3 ClipOut(Shape3 clipper) {
+		// Make the shape clockwise
+		if (handedness != Handedness.Left) {
+			Reverse();
+		}
+		// Make the clipper counterclockwise
+		if (clipper.handedness != Handedness.Right) {
+			Reverse();
+		}
+		
+		int ai = 0, bi = 0;
+		Shape3 clipped = new Shape3();
+		Vector3 start = vertices[0];
+		
+		// Traverse the shape to find a vertex outside of the clipper
+		while (clipper.PointInside(start)) {
+			if (ai > vertices.Count) {
+				return null;
+			}
+			start = vertices[++ai];
+		}
+		
+		clipped.AddVertex(start);
+		
+		// a: traversed; b: checked against
+		Shape3 a = this;
+		Shape3 b = clipper;
+		
+		Vector3 inter;
+		Vector3 current = start;
+		Vector3 previous = start;
+		do {
+			int i = 0;
+			while (i < a.Count) {
+				current = a.vertices[(i + ai + 1) % a.Count];
+				Edge3Abs e = new Edge3Abs(previous, current);
+				
+				// Find the closest intersection in b
+				float closest = float.PositiveInfinity;
+				Vector3 cl = current;
+				int j = 0;
+				foreach (Edge3Abs f in b) {
+					inter = e.IntersectXZ(f);
+					if (!float.IsNaN(inter.x)) {
+						if ((previous - inter).sqrMagnitude < closest) {
+							closest = (previous - inter).sqrMagnitude;
+							cl = inter;
+							bi = j;
+						}
+					}
+					j++;
+				}
+				
+				// If there has been any intersection, add vertex and change shapes around
+				if (!float.IsInfinity(closest) && cl != previous) {
+					clipped.AddVertex(cl);
+					
+					Shape3 tempShape = a;
+					a = b;
+					b = tempShape;
+					
+					i = bi;
+					
+					previous = cl;
+				} else {
+					// Otherwise add the vertex and carry along
+					clipped.AddVertex(current);
+					previous = current;
+					i++;
+				}
+			}
+		} while (current != start);
+		// I guess this will be an infinite loop with improper shapes
+		
+		return clipped;
 	}
 	
 	public void Translate(Vector3 t)
@@ -511,6 +595,19 @@ public class Shape3: IEnumerable
 		return false;
 	}
 	
+	public bool PerimeterIntersect(Shape3 other) {
+		Vector3 inter;
+		
+		foreach (Edge3Abs e in this) {
+			foreach (Edge3Abs f in other) {
+				inter = e.IntersectXZ(f);
+				if (!float.IsNaN(inter.x)) return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public void AddVertex(Vector3 vert)
 	{
 		if (vertices.Count == 0 || vertices[vertices.Count - 1] != vert) {
@@ -534,7 +631,7 @@ public class Shape3: IEnumerable
 		for (int i = offset; i - offset < vertices.Count; i++) {
 			newList.Add(vertices[i % vertices.Count]);
 		}
-
+	
 		vertices = newList;
 	}
 
@@ -583,7 +680,7 @@ public class Shape3: IEnumerable
 			return vertices.Count;
 		}
 	}
-
+	
 	public bool PointInside(Vector3 point)
 	{
 		bool c = false;
@@ -679,7 +776,7 @@ public class SetOfPoints
 					}
 				}
 				pointOnHull = endpoint;
-			} while (start != endpoint);
+			} while ((start - endpoint).sqrMagnitude > 2e-3f);
 			dirty = false;
 		}
 		

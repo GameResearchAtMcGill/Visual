@@ -17,6 +17,7 @@ public class StealthCoordGuardEditor : Editor {
 	{
 		GUI.skin.label.wordWrap = true;
 		
+		GUILayout.Label("A guard is meant to represent an enemy which can move and see. Its field of view is occluded by obstacles.");
 		GUILayout.Label("Coordinate Guard Parameters", EditorStyles.boldLabel);
 		
 		g.posX = EditorGUILayout.FloatField ("X Position:", g.posX);
@@ -27,6 +28,10 @@ public class StealthCoordGuardEditor : Editor {
 		g.frontSegments = EditorGUILayout.IntField("Front segments:", g.frontSegments);
 		g.maxSpeed = EditorGUILayout.FloatField("Max speed:", g.maxSpeed);
 		g.maxOmega = EditorGUILayout.FloatField("Max angular speed:", g.maxOmega);
+		StealthFov.debug = EditorGUILayout.Toggle("Debug Gizmos", StealthFov.debug);
+		
+		GUILayout.Label("");
+		GUILayout.Label("Easiness: " + (Mathf.Round(g.easiness*10000)*0.01) + "%");
 		
 		GUILayout.Label("");
 		GUILayout.Label("Move it, rotate it, or change the FoV, View Distance and Front Segments using the Tools in the editor, or the fields above.");

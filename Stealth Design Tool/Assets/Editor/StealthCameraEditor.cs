@@ -12,8 +12,11 @@ public class StealthCameraEditor : Editor {
 	
 	public override void OnInspectorGUI()
 	{
+		GUILayout.Label("A camera is meant to represent an enemy which cannot move, but can rotate regularly and see. Its field of view is occluded by obstacles.");
+		GUILayout.Label("Camera Parameters", EditorStyles.boldLabel);
 		c.rotation = EditorGUILayout.FloatField ("Rotation", c.rotation);
-		c.position = EditorGUILayout.Vector3Field ("Position", c.position);
+		c.posX = EditorGUILayout.FloatField ("X Position", c.posX);
+		c.posZ = EditorGUILayout.FloatField ("Z Position", c.posZ);
 		c.type = (StealthCamera.Type) EditorGUILayout.EnumPopup ("Type", c.type);
 		c.omega = EditorGUILayout.FloatField ("Angular speed", c.omega);
 		if (c.type == StealthCamera.Type.Sweeping)
@@ -22,6 +25,13 @@ public class StealthCameraEditor : Editor {
 		c.fieldOfView = EditorGUILayout.FloatField ("Field of View", c.fieldOfView);
 		c.frontSegments = EditorGUILayout.IntField("Front segments:", c.frontSegments);
 		c.pause = EditorGUILayout.FloatField ("Pause", c.pause);
+		StealthFov.debug = EditorGUILayout.Toggle("Debug Gizmos", StealthFov.debug);
+		
+		GUILayout.Label("");
+		GUILayout.Label("Easiness: " + (Mathf.Round(c.easiness*10000)*0.01) + "%");
+		
+		GUILayout.Label("");
+		GUILayout.Label("Move it, rotate it, or change the FoV, View Distance and Amplitude or Angular speed using the Tools in the editor, or the fields above.");
 	}
 
 	Tool lastTool = Tool.None;

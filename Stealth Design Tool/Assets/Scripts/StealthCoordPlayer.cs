@@ -106,7 +106,6 @@ public class StealthCoordPlayer : StealthPlayer {
 		go.AddComponent ("StealthPlayerPosition");
 
 		if (last != null) {
-			Debug.Log(last.time);
 			
 			StealthPlayerPosition pp = go.GetComponent<StealthPlayerPosition> ();
 			

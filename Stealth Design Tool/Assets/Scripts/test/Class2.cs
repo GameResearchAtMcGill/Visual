@@ -6,13 +6,14 @@ public class Class2 : MonoBehaviour {
 	
 	public void OnDrawGizmos() {
 		Shape3 clipper = new Shape3();
-		Quaternion q = Quaternion.Euler(0, 20, 0);
-		clipper.AddVertex(q * new Vector3(10, 0, 10));
-		clipper.AddVertex(q * new Vector3(10, 0, -10));
-		clipper.AddVertex(q * new Vector3(-10, 0, -10));
+		Quaternion q = Quaternion.Euler(0, 5, 0);
 		clipper.AddVertex(q * new Vector3(-10, 0, 10));
+		clipper.AddVertex(q * new Vector3(10, 0, 10));
+		clipper.AddVertex(q * new Vector3(20, 0, 50));
+		clipper.AddVertex(q * new Vector3(-20, 0, 50));
 		
 		Gizmos.color = Color.red;
+		Gizmos.DrawSphere(clipper[0], 1);
 		foreach (Edge3Abs e in clipper) {
 			Gizmos.DrawLine(e.a, e.b);
 		}
@@ -27,7 +28,7 @@ public class Class2 : MonoBehaviour {
 			Gizmos.DrawLine(e.a, e.b);
 		}
 		
-		Shape3 clipped = clippee.Clip(clipper);
+		Shape3 clipped = clippee.ClipOut(clipper);
 		
 		Gizmos.color = Color.green;
 		foreach (Edge3Abs e in clipped) {

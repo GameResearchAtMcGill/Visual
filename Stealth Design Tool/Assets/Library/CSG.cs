@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System;
 
 // Port of cgsjs
-// Too slow to run
+// Runs pretty slow
 // Results are too ugly
 // Stack overflow with bigger inputs
-// But it works
+// At least it works
 
 public struct Vertex {
 	public Vector3 position;

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using UnityEditor;
 
 [ExecuteInEditMode]
 public class PrefabShim : MonoBehaviour {
@@ -12,15 +12,15 @@ public class PrefabShim : MonoBehaviour {
 	{
 		if (transform.parent == null) {
 			MonoBehaviour[] components = gameObject.GetComponents<MonoBehaviour>();
-		
+			
 			foreach (MonoBehaviour mb in components) {
 				if (!mb.enabled)
 					mb.enabled = true;
 			}
 			
-			Debug.Log(transform.parent);
+			PrefabUtility.DisconnectPrefabInstance(gameObject);
 			
-			DestroyImmediate(this);
+			Object.DestroyImmediate(this);
 		}
 	}
 }

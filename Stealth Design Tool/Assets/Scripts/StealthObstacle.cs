@@ -95,7 +95,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 		Gizmos.color = new Color (0.5f, 0.5f, 0.5f);
 		Gizmos.matrix = Matrix4x4.TRS (position, rotationQ, Vector3.one);
 
-		//Gizmos.DrawWireCube (new Vector3(0.0f, map.timeLength * 0.5f, 0.0f), dimensions);
+		Gizmos.DrawWireCube (new Vector3(0.0f, map.timeLength * 0.5f, 0.0f), dimensions);
 	}
 	
 	public Vector3[] Vertices()
@@ -142,7 +142,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 	public override void UpdateMesh()
 	{
 		mf.sharedMesh.vertices = Vertices ();
-		mf.sharedMesh.RecalculateNormals();
+		mf.sharedMesh.RecalculateNormals();		
 	}
 	
 	public override void MapChanged()

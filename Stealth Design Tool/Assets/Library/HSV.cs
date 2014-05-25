@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class HSV {
+public static class HSV {
 
 	public static Color Color(float h, float s, float v, float a) {
 		h = (h % 360 + 360) % 360;

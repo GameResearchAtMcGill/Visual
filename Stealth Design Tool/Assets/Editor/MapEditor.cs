@@ -4,12 +4,25 @@ using UnityEditor;
 [CustomEditor(typeof(Map))]
 public class MapEditor : Editor {
 	private Map m;
-
+	
 	void Awake ()
 	{
 		m = (Map)target;
 	}
-
+	
+	public Vector3 CameraPointingAt() {
+		var view = SceneView.currentDrawingSceneView;
+		
+		if (view != null) {
+			Vector3 o = view.camera.transform.position;
+			Vector3 t = view.camera.transform.forward;
+			float c = -o.y/t.y;
+			return new Vector3(o.x + c * t.x, 0, o.z + c * t.z);
+		} else {
+			return Vector3.zero;
+		}
+	}
+	
 	public override void OnInspectorGUI()
 	{
 		GUI.skin.label.wordWrap = true;
@@ -30,6 +43,9 @@ public class MapEditor : Editor {
 			GameObject go = new GameObject();
 			go.transform.parent = m.transform;
 			go.AddComponent("StealthObstacle");
+			Vector3 pos = CameraPointingAt();
+			go.GetComponent<StealthObstacle>().posX = pos.x;
+			go.GetComponent<StealthObstacle>().posZ = pos.z;
 			Selection.activeTransform = go.transform;
 		}
 		
@@ -93,7 +109,7 @@ public class MapEditor : Editor {
 	}
 	
 	void OnSceneGUI ()
-	{
+	{	
 		if (Tools.current != Tool.None) {
 			lastTool = Tools.current;
 			Tools.current = Tool.None;

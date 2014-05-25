@@ -78,10 +78,12 @@ public class Map : MonoBehaviour, IObstacle {
 
 	}
 	
+	void OnEnable() {
+		CreateMesh();
+	}
+	
 	void Reset()
 	{
-		PrefabUtility.DisconnectPrefabInstance(gameObject);
-		
 		gameObject.name = "Map";
 		
 		if (gameObject.GetComponent<MeshFilter> () == null)
@@ -93,8 +95,6 @@ public class Map : MonoBehaviour, IObstacle {
 
 		Material mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/MapMat.mat", typeof(Material));
 		gameObject.renderer.material = mat;
-
-		CreateMesh ();
 	}
 
 	void Update ()
@@ -263,10 +263,10 @@ public class Map : MonoBehaviour, IObstacle {
 	
 	public Shape3 GetShape() {
 		Shape3 ret = new Shape3();
-		ret.AddVertex(new Vector3( sizeX*0.5f+1e-2f, 0, sizeZ*0.5f+1e-2f));
-		ret.AddVertex(new Vector3( sizeX*0.5f+1e-2f, 0,-sizeZ*0.5f-1e-2f));
-		ret.AddVertex(new Vector3(-sizeX*0.5f-1e-2f, 0,-sizeZ*0.5f-1e-2f));
-		ret.AddVertex(new Vector3(-sizeX*0.5f-1e-2f, 0, sizeZ*0.5f+1e-2f));
+		ret.AddVertex(new Vector3( sizeX*0.5001f, 0, sizeZ*0.5001f));
+		ret.AddVertex(new Vector3( sizeX*0.5001f, 0,-sizeZ*0.5001f));
+		ret.AddVertex(new Vector3(-sizeX*0.5001f, 0,-sizeZ*0.5001f));
+		ret.AddVertex(new Vector3(-sizeX*0.5001f, 0, sizeZ*0.5001f));
 		return ret;
 	}
 	

@@ -64,7 +64,6 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public float easiness {
 		get {
-			return 1.0f;
 			float volume = convexHull.Area * map.timeLength;
 			return (volume - vlm_)/volume;
 		}
@@ -93,11 +92,12 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public void OnDrawGizmos()
 	{
-		if (!debug) {
-			return;
-		}
 		foreach (Edge3Abs e in setOfPoints.ConvexHull()) {
 			Gizmos.DrawLine(e.a, e.b);
+		}
+		
+		if (!debug) {
+			return;
 		}
 		
 		foreach (IObstacle so in map.GetObstacles()) {
@@ -318,7 +318,7 @@ public abstract class StealthFov : MeshMapChild {
 			
 			foreach (Shape3 shadow in shadows) {
 				if (shadow.PointInside(position)) {
-					vision_ = vision_.Clip(shadow);
+					vision_ = vision_.ClipIn(shadow);
 					
 					int offset = -1;
 					for (int i = 0; i < vision_.Count; i++) {
@@ -422,11 +422,17 @@ public abstract class StealthFov : MeshMapChild {
 			}
 		}
 		
+		int clipped = 0;
 		foreach (Shape3 clip in clipping) {
-			vision_ = vision_.Clip(clip);
+			// Avoid unnecessary clipping
+			if (clip.PerimeterIntersect(vision_)) {
+				vision_ = vision_.ClipIn(clip);
+				clipped++;
+			}
+			
 		}
 		
-		if (clipping.Count > 0) {
+		if (clipped > 0) {
 			int offset = -1;
 			for (int i = 0; i < vision_.Count; i++) {
 				Vector3 v = vision_[i];
