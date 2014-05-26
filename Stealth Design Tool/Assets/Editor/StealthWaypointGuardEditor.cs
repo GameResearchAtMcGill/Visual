@@ -25,6 +25,7 @@ public class StealthWaypointGuardEditor : Editor {
 		
 		GUILayout.Label("");
 		GUILayout.Label("Easiness: " + (Mathf.Round(g.easiness*10000)*0.01) + "%");
+		GUILayout.Label("Combined Easiness: " + (Mathf.Round(g.combinedEasiness*10000)*0.01) + "%");
 		
 		GUILayout.Label("");
 		GUILayout.Label("Change the FoV, View Distance and Front Segments using the Scale Tool in the editor, or the fields above.");

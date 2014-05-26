@@ -4,7 +4,6 @@ StealthDesignTool
 Stealth Design and Analysis Tool for Unity.
 
 **TODO**
-* Add merge of convex hulls for easiness factor.
 * Fix waypoint deletion bug.
 * Add rotation to player and/or proper class hierarchy for guards and players.
 * Add Undo support.

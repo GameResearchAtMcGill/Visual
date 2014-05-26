@@ -29,6 +29,7 @@ public class StealthCameraEditor : Editor {
 		
 		GUILayout.Label("");
 		GUILayout.Label("Easiness: " + (Mathf.Round(c.easiness*10000)*0.01) + "%");
+		GUILayout.Label("Combined Easiness: " + (Mathf.Round(c.combinedEasiness*10000)*0.01) + "%");
 		
 		GUILayout.Label("");
 		GUILayout.Label("Move it, rotate it, or change the FoV, View Distance and Amplitude or Angular speed using the Tools in the editor, or the fields above.");

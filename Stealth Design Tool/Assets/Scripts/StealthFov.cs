@@ -73,11 +73,34 @@ public abstract class StealthFov : MeshMapChild {
 	public float combinedEasiness
 	{
 		get {
-			Shape3 cvHull = convexHull;
-			foreach (StealthGuard sg in map.GetGuards()) {
+			combined.points.Clear();
+			
+			
+			foreach (Vector3 v in setOfPoints.points) {
+				combined.AddPoint(v);
 			}
 			
-			return 1.0f;
+			float totalVol = 0;
+			Shape3 cvHull = convexHull;
+			foreach (StealthGuard sg in map.GetGuards()) {
+				if (cvHull.SATCollision(sg.convexHull)) {
+					foreach(Vector3 v in sg.setOfPoints.points) {
+						combined.AddPoint(v);
+					}
+					totalVol += sg.shVolume;
+				}
+			}
+			foreach (StealthCamera c in map.GetCameras()) {
+				if (cvHull.SATCollision(c.convexHull)) {
+					foreach(Vector3 v in c.setOfPoints.points) {
+						combined.AddPoint(v);
+					}
+					totalVol += c.shVolume;
+				}
+			}
+			
+			float volume = combined.ConvexHull().Area * map.timeLength;
+			return (volume - vlm_)/volume;
 		}
 	}
 	

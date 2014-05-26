@@ -32,6 +32,7 @@ public class StealthCoordGuardEditor : Editor {
 		
 		GUILayout.Label("");
 		GUILayout.Label("Easiness: " + (Mathf.Round(g.easiness*10000)*0.01) + "%");
+		GUILayout.Label("Combined Easiness: " + (Mathf.Round(g.combinedEasiness*10000)*0.01) + "%");
 		
 		GUILayout.Label("");
 		GUILayout.Label("Move it, rotate it, or change the FoV, View Distance and Front Segments using the Tools in the editor, or the fields above.");
