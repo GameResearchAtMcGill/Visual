@@ -120,7 +120,7 @@ public class Class1 : MonoBehaviour {
 			return false;
 		}
 		
-		Vector3 closest = e.closest(twoDim);
+		Vector3 closest = e.ClosestTo(twoDim);
 		
 		// Ignore edge if closest point farther than view distance
 		if (Vector3.Distance(closest, twoDim) > viewDist)
@@ -183,7 +183,7 @@ public class Class1 : MonoBehaviour {
 		// Split the edge in two if crosses over the back of the FoV
 		Edge3Abs e2;
 		e2.a = twoDim;
-		e2.b = twoDim + Quaternion.Euler(0, rotation, 0) * new Vector3(-e.furthest(twoDim).sqrMagnitude, 0, 0);
+		e2.b = twoDim + Quaternion.Euler(0, rotation, 0) * new Vector3(-e.FarthestFrom(twoDim).sqrMagnitude, 0, 0);
 		Gizmos.color = Color.gray;
 		Gizmos.DrawLine(e2.a, e2.b);
 		Gizmos.color = Color.green;
@@ -365,7 +365,7 @@ public class Class1 : MonoBehaviour {
 				// Still on curr, but a wild edge appeared (kv)
 				Gizmos.DrawCube(kv.Value.a, Vector3.one);
 				// If the new edge is closer than curr, project from it
-				if (curr.Value.Value.rightOf(kv.Value.a)) {
+				if (curr.Value.Value.RightOf(kv.Value.a)) {
 					Edge3Abs e = new Edge3Abs(twoDim, twoDim + (kv.Value.a - twoDim).normalized * viewDist * 2f);
 					thisShape.AddVertex(e.IntersectXZ(curr.Value.Value));
 					

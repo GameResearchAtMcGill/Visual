@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,37 +12,29 @@ public struct Edge3Abs
 	public Vector3 a;
 	public Vector3 b;
 	
-	public Vector3 rightNormal {
-		get {
-			return (new Vector3(-(b.z - a.z), 0, b.x - a.x)).normalized;
-		}
-	}
-	
-	public Vector3 leftNormal {
-		get {
-			return (new Vector3(b.z - a.z, 0, -(b.x - a.x))).normalized;
-		}
-	}
-	
-	public bool rightOf(Vector3 v)
+	public Edge3Abs(Vector3 a, Vector3 b)
 	{
-		return Vector3.Cross(v - a, b - a).y < 0;
+		this.a = a;
+		this.b = b;
 	}
 	
-	public bool leftOf(Vector3 v)
+	public Vector3 middle { get { return 0.5f * (b + a); } }
+	public Vector3 rightNormal { get { return (new Vector3(-(b.z - a.z), 0, b.x - a.x)).normalized; } }
+	public Vector3 leftNormal { get { return (new Vector3(b.z - a.z, 0, -(b.x - a.x))).normalized; } }
+	
+	public bool RightOf(Vector3 v)
 	{
-		return Vector3.Cross(v - a, b - a).y > 0;
+		return FPComp.nearlyLessThan(Vector3.Cross(v - a, b - a).y, 0);
 	}
 	
-	public Vector3 middle {
-		get {
-			return 0.5f * (b + a);
-		}
-	}
-	
-	public Vector3 closest(Vector3 point)
+	public bool LeftOf(Vector3 v)
 	{
-		// Find point on edge closest to PoV
+		return FPComp.nearlyGreaterThan(Vector3.Cross(v - a, b - a).y, 0);
+	}
+	
+	public Vector3 ClosestTo(Vector3 point)
+	{
+		// Find point on edge closest to the point
 		float proj_v = Vector3.Dot(point - a, (b - a).normalized);
 		Vector3 closest;
 		if (proj_v < 0)
@@ -54,7 +47,7 @@ public struct Edge3Abs
 		return closest;
 	}
 	
-	public Vector3 furthest(Vector3 point)
+	public Vector3 FarthestFrom(Vector3 point)
 	{
 		float da = Vector3.Distance(point, a);
 		float db = Vector3.Distance(point, b);
@@ -64,17 +57,6 @@ public struct Edge3Abs
 		} else {
 			return b;
 		}
-	}
-	
-	public Edge3Abs(Vector3 a, Vector3 b)
-	{
-		this.a = a;
-		this.b = b;
-	}
-
-	public Edge3Rel ToRel()
-	{
-		return new Edge3Rel(a, b - a);
 	}
 
 	/** Returns the vector from a to b */
@@ -92,45 +74,43 @@ public struct Edge3Abs
 	 */
 	public Vector3 IntersectXZ(Edge3Abs other)
 	{
-		Vector3 p1 = a;
-		Vector3 p2 = b;
+		
+		double p1x = a.x;
+		double p1y = a.z;
+		double p2x = b.x;
+		double p2y = b.z;
 
-		Vector3 q1 = other.a;
-		Vector3 q2 = other.b;
+		double q1x = other.a.x;
+		double q1y = other.a.z;
+		double q2x = other.b.x;
+		double q2y = other.b.z;
 
-		float d = (p1.x - p2.x) * (q1.z - q2.z) - (p1.z - p2.z) * (q1.x - q2.x);
+		double d = (p1x - p2x) * (q1y - q2y) - (p1y - p2y) * (q1x - q2x);
 
 		if (d == 0)
 			return new Vector3(float.NaN, float.NaN, float.NaN);
-
-		float xi = ((q1.x - q2.x) * (p1.x * p2.z - p1.z * p2.x) - (p1.x - p2.x) * (q1.x * q2.z - q1.z * q2.x)) / d;
-		float yi = ((q1.z - q2.z) * (p1.x * p2.z - p1.z * p2.x) - (p1.z - p2.z) * (q1.x * q2.z - q1.z * q2.x)) / d;
-
-		if (xi + 1e-4 < Mathf.Min(p1.x, p2.x) || xi - 1e-4 > Mathf.Max(p1.x, p2.x))
+		double xi = ((q1x - q2x) * (p1x * p2y - p1y * p2x) - (p1x - p2x) * (q1x * q2y - q1y * q2x)) / d;
+		double yi = ((q1y - q2y) * (p1x * p2y - p1y * p2x) - (p1y - p2y) * (q1x * q2y - q1y * q2x)) / d;
+		
+		
+		if (DPComp.nearlyLessThan(xi, Math.Min(p1x, p2x)) || DPComp.nearlyGreaterThan(xi, Math.Max(p1x, p2x)))
 			return new Vector3(float.NaN, float.NaN, float.NaN);
-		if (xi + 1e-4 < Mathf.Min(q1.x, q2.x) || xi - 1e-4 > Mathf.Max(q1.x, q2.x))
+		if (DPComp.nearlyLessThan(xi, Math.Min(q1x, q2x)) || DPComp.nearlyGreaterThan(xi, Math.Max(q1x, q2x)))
 			return new Vector3(float.NaN, float.NaN, float.NaN);
-		if (yi + 1e-4 < Mathf.Min(p1.z, p2.z) || yi - 1e-4 > Mathf.Max(p1.z, p2.z))
+		if (DPComp.nearlyLessThan(yi, Math.Min(p1y, p2y)) || DPComp.nearlyGreaterThan(yi, Math.Max(p1y, p2y)))
 			return new Vector3(float.NaN, float.NaN, float.NaN);
-		if (yi + 1e-4 < Mathf.Min(q1.z, q2.z) || yi - 1e-4 > Mathf.Max(q1.z, q2.z))
+		if (DPComp.nearlyLessThan(yi, Math.Min(q1y, q2y)) || DPComp.nearlyGreaterThan(yi, Math.Max(q1y, q2y)))
 			return new Vector3(float.NaN, float.NaN, float.NaN);
 
-		return new Vector3(xi, a.y, yi);
-	}
-
-	public Vector3 IntersectXZ(Edge3Rel other)
-	{
-		return IntersectXZ(other.ToAbs());
+		return new Vector3((float)xi, a.y, (float)yi);
 	}
 	
 	public override bool Equals(object other)
 	{
+		if (other == null) return false;
 		if (other is Edge3Abs) {
 			return (a == ((Edge3Abs)other).a && b == ((Edge3Abs)other).b) ||
 			(b == ((Edge3Abs)other).a && a == ((Edge3Abs)other).a);
-		} else if (other is Edge3Rel) {
-			return (a == ((Edge3Rel)other).pos && b == ((Edge3Rel)other).pos + ((Edge3Rel)other).vec) ||
-			(a == ((Edge3Rel)other).pos + ((Edge3Rel)other).vec && b == ((Edge3Rel)other).pos);
 		}
 		return false;
 	}
@@ -141,82 +121,6 @@ public struct Edge3Abs
 	}
 }
 
-/**
- * An edge between a point (pos) and its offset (vec)
- */
-public struct Edge3Rel
-{
-	public Vector3 pos;
-	public Vector3 vec;
-
-	public Edge3Rel(Vector3 pos, Vector3 vec)
-	{
-		this.pos = pos;
-		this.vec = vec;
-	}
-
-	public Edge3Abs ToAbs()
-	{
-		return new Edge3Abs(pos, pos + vec);
-	}
-
-	public Vector3 IntersectXZ(Edge3Abs other)
-	{
-		return (ToAbs().IntersectXZ(other));
-	}
-
-	public Vector3 IntersectXZ(Edge3Rel other)
-	{
-		return (ToAbs().IntersectXZ(other.ToAbs()));
-	}
-
-	public override bool Equals(object other)
-	{
-		if (other is Edge3Abs) {
-			return (pos == ((Edge3Abs)other).a && pos + vec == ((Edge3Abs)other).b) ||
-			(pos == ((Edge3Abs)other).b && pos + vec == ((Edge3Abs)other).a);
-		} else if (other is Edge3Rel) {
-			return (pos == ((Edge3Rel)other).pos && vec == ((Edge3Rel)other).vec) ||
-			(pos == ((Edge3Rel)other).pos + vec && vec == -((Edge3Rel)other).vec);
-		}
-		return false;
-	}
-
-	public override int GetHashCode()
-	{
-		return base.GetHashCode();
-	}
-}
-
-public struct IndexEdge
-{
-	public int i1;
-	public int i2;
-
-	public IndexEdge(int a, int b)
-	{
-		i1 = a;
-		i2 = b;
-	}
-
-	public Edge3Abs GetEdge(Vector3[] vertices)
-	{
-		return new Edge3Abs(vertices[i1], vertices[i2]);
-	}
-
-	public override bool Equals(object other)
-	{
-		if (other is IndexEdge) {
-			return ((IndexEdge)other).i1 == i1 && ((IndexEdge)other).i2 == i2;
-		}
-		return false;
-	}
-
-	public override int GetHashCode()
-	{
-		return base.GetHashCode();
-	}
-}
 
 public struct Pose
 {
@@ -243,58 +147,40 @@ public struct Pose
 		omega = 0;
 	}
 	
-	public float posX {
-		get {
-			return position.x;
-		}
-		set {
-			position.x = value;
-		}
+	public float posX
+	{
+		get { return position.x; }
+		set { position.x = value; }
 	}
 	
-	public float time {
-		get {
-			return position.y;
-		}
-		set {
-			position.y = value;
-		}
+	public float time
+	{
+		get { return position.y; }
+		set { position.y = value; }
 	}
 	
-	public float posZ {
-		get {
-			return position.z;
-		}
-		set {
-			position.z = value;
-		}
+	public float posZ
+	{
+		get { return position.z; }
+		set { position.z = value; }
 	}
 	
-	public float rotation {
-		get {
-			return rotationQ.eulerAngles.y;
-		}
-		set {
-			rotationQ = Quaternion.Euler(0, value, 0);
-		}
+	public float rotation
+	{
+		get { return rotationQ.eulerAngles.y; }
+		set { rotationQ = Quaternion.Euler(0, value, 0); }
 	}
 	
-	public float velX {
-		get {
-			return velocity.x;
-		}
-		set {
-			velocity.x = value;
-		}
+	public float velX
+	{
+		get { return velocity.x; }
+		set { velocity.x = value; }
 	}
 	
-	public float velZ {
-		get {
-			return velocity.z;
-		}
-		set {
-			velocity.z = value;
-		}
+	public float velZ
+	{
+		get { return velocity.z; }
+		set { velocity.z = value; }
 	}
 }
 
@@ -305,20 +191,14 @@ public enum Handedness
 	Unknown
 }
 
-public struct Circle
-{
-	public Vector3 center;
-	public float radius;
-}
-
 public class Shape3: IEnumerable
 {
 	private List<Vector3> vertices = new List<Vector3>();
 	private Handedness hand = Handedness.Unknown;
 	
-	public Handedness handedness {
+	public Handedness handedness
+	{
 		get {
-		
 			if (Count < 3) {
 				hand = Handedness.Unknown;
 				return hand;
@@ -347,7 +227,6 @@ public class Shape3: IEnumerable
 			return hand;
 		}
 	}
-	
 	
 	/**
 	 * Clip this shape so as to stay within a convex clipper using the
@@ -410,8 +289,7 @@ public class Shape3: IEnumerable
 		
 		// Traverse the shape to find a vertex outside of the clipper
 		while (clipper.PointInside(start)) {
-			if (ai >= vertices.Count) {
-				Debug.LogError("not outside");
+			if (ai >= vertices.Count - 1) {
 				return new Shape3();
 			}
 			start = vertices[++ai];
@@ -511,83 +389,6 @@ public class Shape3: IEnumerable
 		}
 		
 		vertices = l;
-	}
-	
-	// Only works in specific cases, not robust!
-	public Shape3[] SplitInTwo(Vector3 o, Vector3 dir)
-	{
-		if (PointInside(o))
-			return null;
-		
-		// Find farthest point
-		float farthest = (vertices[0] - o).sqrMagnitude;
-		foreach (Vector3 v in vertices) {
-			float dst = (v - o).sqrMagnitude;
-			if (dst > farthest) {
-				farthest = dst;
-			}
-		}
-		
-		// Split edge
-		Edge3Abs spl = new Edge3Abs(o, o + dir.normalized * Mathf.Sqrt(farthest) * 1.2f);
-		
-		// New halves
-		Shape3 first = new Shape3();
-		Shape3 second = new Shape3();
-		
-		
-		int iCls = -1, iFar = -1;
-		Vector3 intCls = Vector3.zero, intFar = Vector3.zero, inter = Vector3.zero;
-		
-		int i = 0;
-		foreach (Edge3Abs e in this) {
-			inter = e.IntersectXZ(spl);
-			
-			if (!float.IsNaN(inter.x)) {
-				if (iCls == -1) {
-					iCls = i;
-					intCls = inter;
-				} else {
-					iFar = i;
-					intFar = inter;
-					break;
-				}
-			}
-			i++;
-		}
-		
-		// Swap if wrong
-		if ((intFar - o).sqrMagnitude < (intCls - o).sqrMagnitude) {
-			i = iCls;
-			iCls = iFar;
-			iFar = i;
-			
-			inter = intCls;
-			intCls = intFar;
-			intFar = inter;
-		}
-		
-		// First half
-		first.AddVertex(intCls);
-		i = (iCls + 1) % vertices.Count;
-		while (i != (iFar + 1) % vertices.Count) {
-			first.AddVertex(vertices[i]);
-			i = (i + 1) % vertices.Count;
-		}
-		first.AddVertex(intFar);
-		first.Offset(-2);
-		
-		// Second half
-		second.AddVertex(intCls);
-		second.AddVertex(intFar);
-		i = (iFar + 1) % vertices.Count;
-		while (i != (iCls + 1) % vertices.Count) {
-			second.AddVertex(vertices[i]);
-			i = (i + 1) % vertices.Count;
-		}
-		second.Offset(3);
-		
-		return new []{ first, second };
 	}
 	
 	public bool DumbCollision(Shape3 other)
@@ -784,7 +585,6 @@ public class Shape3: IEnumerable
 
 public class SetOfPoints
 {
-	
 	public HashSet<Vector3> points;
 	Shape3 hull;
 	bool dirty;
@@ -816,7 +616,6 @@ public class SetOfPoints
 	
 	public Shape3 ConvexHull()
 	{
-		// TODO: Infinite loop
 		if (dirty) {
 			List<Vector3> ptList = points.ToList();
 			hull.Clear();
@@ -873,30 +672,107 @@ public class SetOfPoints
 
 public static class Geometry {
 	public static Vector3 LineIntersectionXZ(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4) {
-		float x1 = p1.x;
-		float y1 = p1.z;
-		float x2 = p2.x;
-		float y2 = p2.z;
+		double x1 = p1.x;
+		double y1 = p1.z;
+		double x2 = p2.x;
+		double y2 = p2.z;
 		
-		float x3 = p3.x;
-		float y3 = p3.z;
-		float x4 = p4.x;
-		float y4 = p4.z;
+		double x3 = p3.x;
+		double y3 = p3.z;
+		double x4 = p4.x;
+		double y4 = p4.z;
 		
-		float denom = (x1 - x2)*(y3 - y4) - (y1 - y2)*(x3 - x4);
+		double denom = (x1 - x2)*(y3 - y4) - (y1 - y2)*(x3 - x4);
 		
 		if (denom == 0) {
 			return new Vector3(float.NaN, float.NaN, float.NaN);
 		}
 		
-		denom = 1f/denom;
-		float x = ((x1 * y2 - y1 * x2)*(x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4))*denom;
-		float y = ((x1 * y2 - y1 * x2)*(y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4))*denom;
+		double x = ((x1 * y2 - y1 * x2)*(x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4))/denom;
+		double y = ((x1 * y2 - y1 * x2)*(y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4))/denom;
 		
-		return new Vector3(x, 0, y);
+		return new Vector3((float)x, 0, (float)y);
 	}
 	
 	public static bool isLeft(Vector3 l1, Vector3 l2, Vector3 p) {
 		return ((l2.x - l1.x)*(p.z - l1.z) - (l2.z - l1.z)*(p.x - l1.x)) > 0;
+	}
+}
+
+public static class FPComp {
+	const float EPSILON = 1e-5f;
+	
+	/** a == b */
+	public static bool nearlyEqual(float a , float b, float epsilon=EPSILON) {
+		float absA = Mathf.Abs(a);
+		float absB = Mathf.Abs(b);
+		float diff = Mathf.Abs(a - b);
+		
+		if (a == b) {
+			return true;
+		}
+		if (a == 0 || b == 0 || diff < float.MinValue) {
+			return diff < (epsilon * float.MinValue);
+		}
+		return diff / (absA + absB) < epsilon;
+	}
+	
+	/** a &lt; b */
+	public static bool nearlyLessThan(float a, float b, float epsilon=EPSILON) {
+		return !nearlyEqual(a, b, epsilon) && a < b;
+	}
+	
+	/** a &lt;= b */
+	public static bool nearlyLessOrEqual(float a, float b, float epsilon=EPSILON) {
+		return nearlyEqual(a, b, epsilon) && a < b;
+	}
+	
+	/** a &gt; b */
+	public static bool nearlyGreaterThan(float a, float b, float epsilon=EPSILON) {
+		return !nearlyEqual(a, b, epsilon) && a > b;
+	}
+	
+	/** a &gt;= b */
+	public static bool nearlyGreaterOrEqual(float a, float b, float epsilon=EPSILON) {
+		return nearlyEqual(a, b, epsilon) && a > b;
+	}
+}
+
+public static class DPComp {
+	const double EPSILON = 1e-8f;
+	
+	/** a == b */
+	public static bool nearlyEqual(double a , double b, double epsilon=EPSILON) {
+		double absA = Math.Abs(a);
+		double absB = Math.Abs(b);
+		double diff = Math.Abs(a - b);
+		
+		if (a == b) {
+			return true;
+		}
+		if (a == 0 || b == 0 || diff < double.MinValue) {
+			return diff < (epsilon * double.MinValue);
+		}
+		return diff / (absA + absB) < epsilon;
+	}
+	
+	/** a &lt; b */
+	public static bool nearlyLessThan(double a, double b, double epsilon=EPSILON) {
+		return !nearlyEqual(a, b, epsilon) && a < b;
+	}
+	
+	/** a &lt;= b */
+	public static bool nearlyLessOrEqual(double a, double b, double epsilon=EPSILON) {
+		return nearlyEqual(a, b, epsilon) && a < b;
+	}
+	
+	/** a &gt; b */
+	public static bool nearlyGreaterThan(double a, double b, double epsilon=EPSILON) {
+		return !nearlyEqual(a, b, epsilon) && a > b;
+	}
+	
+	/** a &gt;= b */
+	public static bool nearlyGreaterOrEqual(double a, double b, double epsilon=EPSILON) {
+		return nearlyEqual(a, b, epsilon) && a > b;
 	}
 }

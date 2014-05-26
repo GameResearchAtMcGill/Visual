@@ -8,8 +8,14 @@ public abstract class StealthFov : MeshMapChild {
 	public static bool debug = true;
 	
 	public float viewDist_ = 30f;
+	
 	public float fieldOfView_ = 50f;
+	public float minFov { get { return 1;} }
+	public float maxFov { get { return 359;} }
+	
 	public int frontSegments_ = 8;
+	public int maxSegments { get { return Mathf.CeilToInt(fieldOfView_/22.5f); } }
+	public int minSegments { get { return Mathf.CeilToInt(fieldOfView_/90); } }
 	
 	public float viewDistance
 	{
@@ -58,14 +64,16 @@ public abstract class StealthFov : MeshMapChild {
 		}
 	}
 	
+	public static bool calculateEasiness = true;
 	public SetOfPoints setOfPoints = new SetOfPoints();
 	public Shape3 convexHull { get { return setOfPoints.ConvexHull(); } }
 	
 	public float easiness
 	{
 		get {
+			if (!calculateEasiness) return float.NaN;
 			float volume = convexHull.Area * map.timeLength;
-			return (volume - vlm_)/volume;
+			return Mathf.Max(0, (volume - vlm_)/volume);
 		}
 	}
 	
@@ -73,8 +81,8 @@ public abstract class StealthFov : MeshMapChild {
 	public float combinedEasiness
 	{
 		get {
+			if (!calculateEasiness) return float.NaN;
 			combined.points.Clear();
-			
 			
 			foreach (Vector3 v in setOfPoints.points) {
 				combined.AddPoint(v);
@@ -100,7 +108,7 @@ public abstract class StealthFov : MeshMapChild {
 			}
 			
 			float volume = combined.ConvexHull().Area * map.timeLength;
-			return (volume - vlm_)/volume;
+			return Mathf.Max(0, (volume - vlm_)/volume);
 		}
 	}
 	
@@ -124,9 +132,11 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public void OnDrawGizmos()
 	{
-		Gizmos.color = Color.white;
-		foreach (Edge3Abs e in setOfPoints.ConvexHull()) {
-			Gizmos.DrawLine(e.a, e.b);
+		if (calculateEasiness) {
+			Gizmos.color = Color.white;
+			foreach (Edge3Abs e in setOfPoints.ConvexHull()) {
+				Gizmos.DrawLine(e.a, e.b);
+			}
 		}
 		
 		if (!debug) {
@@ -141,7 +151,7 @@ public abstract class StealthFov : MeshMapChild {
 			
 			bool cont = true;
 			foreach (Edge3Abs e in so.GetShape()) {
-				if (Vector3.Distance(e.closest(new Vector3(position.x, 0, position.z)), new Vector3(position.x, 0, position.z)) <= viewDist_) {
+				if (Vector3.Distance(e.ClosestTo(new Vector3(position.x, 0, position.z)), new Vector3(position.x, 0, position.z)) <= viewDist_) {
 					cont = false;
 					break;
 				}
@@ -169,21 +179,25 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public override void UpdateMesh()
 	{
-		if (map == null)
-			return;
-		List<Vector3> vertexList = new List<Vector3> ();
+		if (map == null) return;
+		
+		List<Shape3> shapes = this.shapes;
+		int estimTriangles = 2*shapes.Count * (2 * (2 + frontSegments_));
+		List<Vector3> vertexList = new List<Vector3> (estimTriangles);
+		List<int> triangles = new List<int> (estimTriangles);
 		
 		float timeStep = map.timeLength / Mathf.FloorToInt((map.timeLength) * map.sub_);
 
 		vlm_ = 0;
-		setOfPoints.points.Clear();
+		if (calculateEasiness) setOfPoints.points.Clear();
 		foreach (Shape3 s in shapes) {
-			// Add the vertices in the set of points
-			foreach (Vector3 v3 in s.Vertices()) {
-				setOfPoints.AddPoint(new Vector3(v3.x, 0, v3.z));
+			if (calculateEasiness) {
+				// Add the vertices in the set of points
+				foreach (Vector3 v3 in s.Vertices()) {
+					setOfPoints.AddPoint(new Vector3(v3.x, 0, v3.z));
+				}
+				vlm_ += s.Area / map.subdivisionsPerSecond;
 			}
-			
-			vlm_ += s.Area / map.subdivisionsPerSecond;
 			
 			foreach (Edge3Abs e in s) {
 				vertexList.Add(e.a);
@@ -198,9 +212,7 @@ public abstract class StealthFov : MeshMapChild {
 		m.Clear ();
 
 		m.vertices = vertexList.ToArray ();
-
-		List<int> triangles = new List<int> ();
-
+		
 		int v = 0;
 		int sh = 0;
 		int maxS = shapes.Count;
@@ -292,7 +304,7 @@ public abstract class StealthFov : MeshMapChild {
 			// Not-so-broad pruning
 			bool cont = true;
 			foreach (Edge3Abs e in o.GetShape()) {
-				if (Vector3.Distance(e.closest(new Vector3(position.x, 0, position.z)), new Vector3(position.x, 0, position.z)) <= viewDist_) {
+				if (Vector3.Distance(e.ClosestTo(new Vector3(position.x, 0, position.z)), new Vector3(position.x, 0, position.z)) <= viewDist_) {
 					cont = false;
 					break;
 				}
@@ -407,12 +419,12 @@ public abstract class StealthFov : MeshMapChild {
 		}
 		
 		// Front segments clipping
-		if (frontSegments_ < Mathf.CeilToInt(fieldOfView_/90)) {
-			frontSegments_ = Mathf.CeilToInt(fieldOfView_/90);
+		if (frontSegments_ < minSegments) {
+			frontSegments_ = minSegments;
 		}
 		
-		if (frontSegments_ > Mathf.CeilToInt(fieldOfView_/22.5f)) {
-			frontSegments_ = Mathf.CeilToInt(fieldOfView_/22.5f);
+		if (frontSegments_ > maxSegments) {
+			frontSegments_ = maxSegments;
 		}
 		
 		// View distance clipping

@@ -22,14 +22,16 @@ public class StealthCameraEditor : Editor {
 		if (c.type == StealthCamera.Type.Sweeping)
 			c.amplitude = EditorGUILayout.FloatField ("Amplitude", c.amplitude);
 		c.viewDistance = EditorGUILayout.FloatField ("View Distance", c.viewDistance);
-		c.fieldOfView = EditorGUILayout.FloatField ("Field of View", c.fieldOfView);
-		c.frontSegments = EditorGUILayout.IntField("Front segments:", c.frontSegments);
+		c.fieldOfView = EditorGUILayout.Slider("Field of View", c.fieldOfView, c.minFov, c.maxFov);
+		c.frontSegments = EditorGUILayout.IntSlider("Front segments", c.frontSegments, c.minSegments, c.maxSegments);
 		c.pause = EditorGUILayout.FloatField ("Pause", c.pause);
 		StealthFov.debug = EditorGUILayout.Toggle("Debug Gizmos", StealthFov.debug);
 		
 		GUILayout.Label("");
+		if (StealthFov.calculateEasiness = EditorGUILayout.Toggle("Calculate Easiness", StealthFov.calculateEasiness)) {
 		GUILayout.Label("Easiness: " + (Mathf.Round(c.easiness*10000)*0.01) + "%");
 		GUILayout.Label("Combined Easiness: " + (Mathf.Round(c.combinedEasiness*10000)*0.01) + "%");
+		}
 		
 		GUILayout.Label("");
 		GUILayout.Label("Move it, rotate it, or change the FoV, View Distance and Amplitude or Angular speed using the Tools in the editor, or the fields above.");

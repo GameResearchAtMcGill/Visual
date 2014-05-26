@@ -75,6 +75,9 @@ public class MapEditor : Editor {
 			GameObject go = new GameObject();
 			go.transform.parent = m.transform;
 			go.AddComponent("StealthCamera");
+			Vector3 pos = CameraPointingAt();
+			go.GetComponent<StealthCamera>().posX = pos.x;
+			go.GetComponent<StealthCamera>().posZ = pos.z;
 			Selection.activeTransform = go.transform;
 		}
 		

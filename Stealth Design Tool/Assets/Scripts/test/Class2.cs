@@ -9,6 +9,7 @@ public class Class2 : MonoBehaviour {
 	public bool reverseClippee = false;
 	public int offsetClipper = 0;
 	public int offsetClippee = 0;
+	public float scale = 1;
 	
 	public void OnDrawGizmos() {
 		Shape3 clipper = new Shape3();
@@ -30,10 +31,10 @@ public class Class2 : MonoBehaviour {
 		Shape3 clippee = new Shape3();
 		clippee.AddVertex(q * new Vector3(0, 0, -20) + position);
 		clippee.AddVertex(q * new Vector3(-20, 0, 30) + position);
-		clippee.AddVertex(q * new Vector3(0, 0, 35) + position);
 		clippee.AddVertex(q * new Vector3(20, 0, 30) + position);
 		if (reverseClippee) clippee.Reverse();
 		clippee.Offset(offsetClippee);
+		clippee.RotatedScale(position, rotation, Vector3.one * scale);
 		
 		Gizmos.color = Color.white;
 		foreach (Edge3Abs e in clippee) {
