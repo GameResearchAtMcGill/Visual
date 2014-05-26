@@ -410,7 +410,8 @@ public class Shape3: IEnumerable
 		
 		// Traverse the shape to find a vertex outside of the clipper
 		while (clipper.PointInside(start)) {
-			if (ai > vertices.Count) {
+			if (ai >= vertices.Count) {
+				Debug.LogError("not outside");
 				return new Shape3();
 			}
 			start = vertices[++ai];
@@ -586,7 +587,7 @@ public class Shape3: IEnumerable
 		}
 		second.Offset(3);
 		
-		return new Shape3[]{ first, second };
+		return new []{ first, second };
 	}
 	
 	public bool DumbCollision(Shape3 other)
@@ -601,6 +602,62 @@ public class Shape3: IEnumerable
 			}
 		}
 		return false;
+	}
+	
+	private Vector3[] GetAxes() {
+		Vector3[] axes = new Vector3[vertices.Count];
+		int i = 0;
+		foreach (Edge3Abs e in this) {
+			axes[i++] = e.rightNormal.normalized;
+		}
+		
+		return axes;
+	}
+	
+	struct Projection {
+		float min, max;
+		public Projection(float m, float n) {
+			min = m;
+			max = n;
+		}
+		
+		public bool Overlap(Projection other) {
+			return Mathf.Max(min, other.min) <= Mathf.Min(max, other.max);
+		}
+	}
+	
+	private Projection Project(Vector3 axis) {
+		float min = Vector3.Dot(axis, vertices[0]);
+		float max = min;
+		foreach (Vector3 v in vertices) {
+			float p = Vector3.Dot(v, axis);
+			if (p < min) {
+				min = p;
+			} else if (p > max) {
+				max = p;
+			}
+		}
+		return new Projection(min, max);
+	}
+	
+	/**
+	 * Separating Axis Theorem
+	 */
+	public bool SATCollision(Shape3 convex) {
+		// Loop over the axes
+		foreach (Vector3[] axes in new []{GetAxes(), convex.GetAxes()}) {
+			foreach (Vector3 axis in axes) {
+				// Project
+				Projection p1 = Project(axis);
+				Projection p2 = convex.Project(axis);
+				// If there is no overlap, the shapes don't intersect
+				if (!p1.Overlap(p2)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	public bool PerimeterIntersect(Shape3 other) {

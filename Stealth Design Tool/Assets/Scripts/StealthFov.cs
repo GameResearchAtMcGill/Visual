@@ -11,9 +11,8 @@ public abstract class StealthFov : MeshMapChild {
 	public float fieldOfView_ = 50f;
 	public int frontSegments_ = 8;
 	
-	public SetOfPoints setOfPoints = new SetOfPoints();
-	
-	public float viewDistance {
+	public float viewDistance
+	{
 		get { return viewDist_; }
 		set {
 			if (value != viewDist_) {
@@ -24,7 +23,8 @@ public abstract class StealthFov : MeshMapChild {
 		}
 	}
 	
-	public float fieldOfView {
+	public float fieldOfView
+	{
 		get { return fieldOfView_; }
 		set {
 			if (value != fieldOfView_) {
@@ -35,7 +35,8 @@ public abstract class StealthFov : MeshMapChild {
 		}
 	}
 	
-	public int frontSegments {
+	public int frontSegments
+	{
 		get { return frontSegments_; }
 		set {
 			if (value != frontSegments_) {
@@ -47,7 +48,8 @@ public abstract class StealthFov : MeshMapChild {
 	}
 	
 	private List<Shape3> shapes_ = null;
-	private List<Shape3> shapes {
+	private List<Shape3> shapes
+	{
 		get {
 			if (shapes_ == null || dirty) {
 				shapes_ = Shapes();
@@ -56,27 +58,34 @@ public abstract class StealthFov : MeshMapChild {
 		}
 	}
 	
-	public Shape3 convexHull {
-		get {
-			return setOfPoints.ConvexHull();
-		}
-	}
+	public SetOfPoints setOfPoints = new SetOfPoints();
+	public Shape3 convexHull { get { return setOfPoints.ConvexHull(); } }
 	
-	public float easiness {
+	public float easiness
+	{
 		get {
 			float volume = convexHull.Area * map.timeLength;
 			return (volume - vlm_)/volume;
 		}
 	}
 	
-	private float vlm_ = 0;
-	public float shVolume {
+	public SetOfPoints combined = new SetOfPoints();
+	public float combinedEasiness
+	{
 		get {
-			return vlm_;
+			Shape3 cvHull = convexHull;
+			foreach (StealthGuard sg in map.GetGuards()) {
+			}
+			
+			return 1.0f;
 		}
 	}
 	
-	new protected void Awake() {
+	private float vlm_ = 0;
+	public float shVolume { get { return vlm_; } }
+	
+	new protected void Awake()
+	{
 		base.Awake();
 		
 		gameObject.name = "Field of view";
@@ -92,6 +101,7 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public void OnDrawGizmos()
 	{
+		Gizmos.color = Color.white;
 		foreach (Edge3Abs e in setOfPoints.ConvexHull()) {
 			Gizmos.DrawLine(e.a, e.b);
 		}
@@ -228,18 +238,21 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public abstract List<Shape3> Shapes();
 	
-	private float ToTheta(Vector3 p) {
+	private float ToTheta(Vector3 p)
+	{
 		Vector3 diff = new Vector3(p.x - position.x, 0, p.z - position.z);
 		diff = Quaternion.Euler(0, -rotation, 0) * diff;
 		
 		return Mathf.Atan2(diff.z, diff.x);
 	}
 	
-	private float ToDist(Vector3 p) {
+	private float ToDist(Vector3 p)
+	{
 		return new Vector3(position.x - p.x, 0, position.z - p.z).magnitude;
 	}
 	
-	public Shape3 Occlude(Vector3 position, float rotation) {
+	public Shape3 Occlude(Vector3 position, float rotation)
+	{
 		Shape3 vision_ = new Shape3 ();
 		foreach (Edge3Abs e in Vertices(position, rotation)) {
 			vision_.AddVertex(e.a);
@@ -268,7 +281,7 @@ public abstract class StealthFov : MeshMapChild {
 				clipping.Add(o.GetShape());
 				continue;
 			} 
-			Shape3[] shadows = new []{o.ShadowPolygon(position, viewDist_)};
+			Shape3[] shadows = {o.ShadowPolygon(position, viewDist_)};
 			
 			
 			foreach (Shape3 shadow in shadows) {
@@ -319,7 +332,8 @@ public abstract class StealthFov : MeshMapChild {
 		return vision_;
 	}
 	
-	public Shape3 Vertices(Vector3 position, float rotation) {
+	public Shape3 Vertices(Vector3 position, float rotation)
+	{
 		if (frontSegments < 1) {
 			frontSegments = 1;
 		}
@@ -344,6 +358,7 @@ public abstract class StealthFov : MeshMapChild {
 	{
 		position.y = 0;
 		
+		// Position clipping
 		if (position.x > 0.5f * map.dimensions.x) {
 			position.x = 0.5f * map.dimensions.x;
 		}
@@ -360,6 +375,7 @@ public abstract class StealthFov : MeshMapChild {
 			position.z = -0.5f * map.dimensions.z;
 		}
 		
+		// Field of view clipping
 		if (fieldOfView_ < 1f) {
 			fieldOfView_ = 1f;
 		}
@@ -367,6 +383,7 @@ public abstract class StealthFov : MeshMapChild {
 			fieldOfView_ = 359f;
 		}
 		
+		// Front segments clipping
 		if (frontSegments_ < Mathf.CeilToInt(fieldOfView_/90)) {
 			frontSegments_ = Mathf.CeilToInt(fieldOfView_/90);
 		}
@@ -375,8 +392,9 @@ public abstract class StealthFov : MeshMapChild {
 			frontSegments_ = Mathf.CeilToInt(fieldOfView_/22.5f);
 		}
 		
-		if (viewDist_ < 0) {
-			viewDist_ = 0;
+		// View distance clipping
+		if (viewDist_ < 0.1f) {
+			viewDist_ = 0.1f;
 		}
 		
 		if (dirty) {

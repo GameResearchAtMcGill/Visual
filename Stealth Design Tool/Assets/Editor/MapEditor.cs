@@ -32,6 +32,7 @@ public class MapEditor : Editor {
 		m.timeLength = EditorGUILayout.FloatField ("Time length:", m.timeLength);
 		m.sizeZ = EditorGUILayout.FloatField ("Size Z:", m.sizeZ);
 		m.subdivisionsPerSecond = EditorGUILayout.FloatField("Subdivisions/sec:", m.subdivisionsPerSecond);
+		m.clipMap = EditorGUILayout.Toggle("Clip map", m.clipMap);
 		
 		GUILayout.Label("");
 		GUILayout.Label("Only add primitives using the buttons below. The active selection will be set automatically to the created primitive.");

@@ -8,7 +8,19 @@ public class Map : MonoBehaviour, IObstacle {
 
 	public Vector3 dimensions = new Vector3 (100.0f, 60.0f, 100.0f);
 	public float sub_ = 1;
-
+	public bool clipMap_ = true;
+	
+	public bool clipMap {
+		get { return clipMap_; }
+		set {
+			if (clipMap_ != value) {
+				dirty = true;
+				clipMap_ = value;
+				Validate();
+			}
+		}
+	}
+	
 	public Vector3 position {
 		get { return Vector3.zero; }
 	}
@@ -176,7 +188,9 @@ public class Map : MonoBehaviour, IObstacle {
 				lst.Add(child.GetComponent<StealthObstacle>());
 			}
 		}
-		lst.Add(this);
+		if (clipMap_) {
+			lst.Add(this);
+		}
 		
 		return lst;
 	}

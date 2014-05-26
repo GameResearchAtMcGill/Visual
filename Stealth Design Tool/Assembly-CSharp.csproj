@@ -72,6 +72,7 @@
      <Compile Include="Assets\Scripts\Waypoints\WaypointManager.cs" />
      <Compile Include="Assets\Scripts\test\Class1.cs" />
      <Compile Include="Assets\Scripts\test\Class2.cs" />
+     <Compile Include="Assets\Scripts\test\Class3.cs" />
      <Compile Include="Assets\Scripts\test\CsgTest.cs" />
      <Compile Include="Assets\Scripts\test\ShapeSplitTest.cs" />
   </ItemGroup>
