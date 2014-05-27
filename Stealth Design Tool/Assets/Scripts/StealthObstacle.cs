@@ -12,6 +12,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 		get { return base.position; }
 	}
 	
+	// disable CompareOfFloatsByEqualityOperator
 	public float sizeX
 	{
 		get { return dimensions.x; }
@@ -102,15 +103,37 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 	{
 		Quaternion rot = rotationQ;
 		Vector3 pos = position;
-		return new Vector3[]{
+		return new []{
+			// Bottom
+			rot * new Vector3( sizeX*0.5f, 0,  sizeZ*0.5f) + pos,
+			rot * new Vector3(-sizeX*0.5f, 0,  sizeZ*0.5f) + pos,
+			rot * new Vector3(-sizeX*0.5f, 0, -sizeZ*0.5f) + pos,
+			rot * new Vector3( sizeX*0.5f, 0, -sizeZ*0.5f) + pos,
+			// North
+			rot * new Vector3( sizeX*0.5f, 0,  sizeZ*0.5f) + pos,
+			rot * new Vector3( sizeX*0.5f, map.timeLength,  sizeZ*0.5f) + pos,
+			rot * new Vector3(-sizeX*0.5f, map.timeLength,  sizeZ*0.5f) + pos,
+			rot * new Vector3(-sizeX*0.5f, 0,  sizeZ*0.5f) + pos,
+			// West
 			rot * new Vector3( sizeX*0.5f, 0,  sizeZ*0.5f) + pos,
 			rot * new Vector3( sizeX*0.5f, 0, -sizeZ*0.5f) + pos,
+			rot * new Vector3( sizeX*0.5f, map.timeLength, -sizeZ*0.5f) + pos,
+			rot * new Vector3( sizeX*0.5f, map.timeLength,  sizeZ*0.5f) + pos,
+			// South
+			rot * new Vector3( sizeX*0.5f, 0, -sizeZ*0.5f) + pos,
+			rot * new Vector3(-sizeX*0.5f, 0, -sizeZ*0.5f) + pos,
+			rot * new Vector3( sizeX*0.5f, map.timeLength, -sizeZ*0.5f) + pos,
+			rot * new Vector3(-sizeX*0.5f, map.timeLength, -sizeZ*0.5f) + pos,
+			// East
 			rot * new Vector3(-sizeX*0.5f, 0, -sizeZ*0.5f) + pos,
 			rot * new Vector3(-sizeX*0.5f, 0,  sizeZ*0.5f) + pos,
+			rot * new Vector3(-sizeX*0.5f, map.timeLength,  sizeZ*0.5f) + pos,
+			rot * new Vector3(-sizeX*0.5f, map.timeLength, -sizeZ*0.5f) + pos,
+			// Top
+			rot * new Vector3(-sizeX*0.5f, map.timeLength,  sizeZ*0.5f) + pos,
 			rot * new Vector3( sizeX*0.5f, map.timeLength,  sizeZ*0.5f) + pos,
 			rot * new Vector3( sizeX*0.5f, map.timeLength, -sizeZ*0.5f) + pos,
 			rot * new Vector3(-sizeX*0.5f, map.timeLength, -sizeZ*0.5f) + pos,
-			rot * new Vector3(-sizeX*0.5f, map.timeLength,  sizeZ*0.5f) + pos,
 		};
 	}
 	
@@ -118,23 +141,15 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 		Mesh m = new Mesh ();
 		m.name = "Obstacle Prism";
 		m.vertices = Vertices ();
-		m.triangles = new int[]{
-			0, 2, 1, 0, 3, 2,
-			4, 0, 1, 4, 1, 5,
-			2, 5, 1, 2, 6, 5,
-			2, 3, 7, 2, 7, 6,
-			3, 0, 4, 3, 4, 7,
-			4, 5, 6, 4, 6, 7
+		m.triangles = new []{
+			0, 1, 2, 0, 2, 3,
+			4, 5, 6, 4, 6, 7,
+			8, 9, 10, 8, 10, 11,
+			12, 13, 14, 14, 13, 15,
+			16, 17, 18, 16, 18, 19,
+			20, 21, 22, 20, 22, 23
 		};
-		m.uv = new Vector2[]{
-			new Vector2(0,0),
-			new Vector2(1,0),
-			new Vector2(0,1),
-			new Vector2(1,1),
-			new Vector2(0,0),
-			new Vector2(1,0),
-			new Vector2(0,1),
-			new Vector2(1,1)};
+		m.uv = new Vector2[m.vertexCount];
 		m.RecalculateNormals();
 		mf.sharedMesh = m;
 	}

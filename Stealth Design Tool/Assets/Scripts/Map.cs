@@ -10,7 +10,8 @@ public class Map : MonoBehaviour, IObstacle {
 	public float sub_ = 1;
 	public bool clipMap_ = true;
 	
-	public bool clipMap {
+	public bool clipMap
+	{
 		get { return clipMap_; }
 		set {
 			if (clipMap_ != value) {
@@ -21,14 +22,10 @@ public class Map : MonoBehaviour, IObstacle {
 		}
 	}
 	
-	public Vector3 position {
-		get { return Vector3.zero; }
-	}
+	public Vector3 position { get { return Vector3.zero; } }
+	public float rotation { get { return 0.0f; } }
 	
-	public float rotation {
-		get { return 0.0f; }
-	}
-	
+	// disable CompareOfFloatsByEqualityOperator
 	public float sizeX
 	{
 		get { return dimensions.x; }
@@ -75,10 +72,7 @@ public class Map : MonoBehaviour, IObstacle {
 		}
 	}
 	
-	private MeshFilter mf
-	{
-		get {return gameObject.GetComponent<MeshFilter> ();}
-	}
+	private MeshFilter mf { get {return gameObject.GetComponent<MeshFilter> ();} }
 
 	void Awake()
 	{
@@ -223,15 +217,32 @@ public class Map : MonoBehaviour, IObstacle {
 
 	private Vector3[] Vertices()
 	{
-		return new Vector3[]{
-			new Vector3(0.5f * sizeX, 0, 0.5f * sizeZ),
-			new Vector3(0.5f * sizeX, 0, -0.5f * sizeZ),
+		return new []{
+			// Bottom
+			new Vector3( 0.5f * sizeX, 0,  0.5f * sizeZ),
+			new Vector3( 0.5f * sizeX, 0, -0.5f * sizeZ),
 			new Vector3(-0.5f * sizeX, 0, -0.5f * sizeZ),
-			new Vector3(-0.5f * sizeX, 0, 0.5f * sizeZ),
-			new Vector3(0.5f * sizeX, timeLength, 0.5f * sizeZ),
-			new Vector3(0.5f * sizeX, timeLength, -0.5f * sizeZ),
+			new Vector3(-0.5f * sizeX, 0,  0.5f * sizeZ),
+			// North
+			new Vector3( 0.5f * sizeX, 0,  0.5f * sizeZ),
+			new Vector3(-0.5f * sizeX, 0,  0.5f * sizeZ),
+			new Vector3(-0.5f * sizeX, timeLength,  0.5f * sizeZ),
+			new Vector3( 0.5f * sizeX, timeLength,  0.5f * sizeZ),
+			// West
+			new Vector3( 0.5f * sizeX, 0,  0.5f * sizeZ),
+			new Vector3( 0.5f * sizeX, timeLength,  0.5f * sizeZ),
+			new Vector3( 0.5f * sizeX, timeLength, -0.5f * sizeZ),
+			new Vector3( 0.5f * sizeX, 0, -0.5f * sizeZ),
+			// South
+			new Vector3(-0.5f * sizeX, 0, -0.5f * sizeZ),
+			new Vector3( 0.5f * sizeX, 0, -0.5f * sizeZ),
+			new Vector3( 0.5f * sizeX, timeLength, -0.5f * sizeZ),
 			new Vector3(-0.5f * sizeX, timeLength, -0.5f * sizeZ),
-			new Vector3(-0.5f * sizeX, timeLength, 0.5f * sizeZ),
+			// East
+			new Vector3(-0.5f * sizeX, 0, -0.5f * sizeZ),
+			new Vector3(-0.5f * sizeX, timeLength, -0.5f * sizeZ),
+			new Vector3(-0.5f * sizeX, timeLength,  0.5f * sizeZ),
+			new Vector3(-0.5f * sizeX, 0,  0.5f * sizeZ),
 		};
 	}
 
@@ -240,22 +251,19 @@ public class Map : MonoBehaviour, IObstacle {
 		Mesh m = new Mesh ();
 		m.name = "Map Space";
 		m.vertices = Vertices ();
-		m.triangles = new int[]{
+		m.triangles = new []{
+			// Bottom
 			0, 1, 2, 0, 2, 3,
-			4, 1, 0, 4, 5, 1,
-			2, 1, 5, 2, 5, 6,
-			2, 7, 3, 2, 6, 7,
-			3, 7, 4, 3, 4, 0
+			// North
+			4, 5, 6, 4, 6, 7,
+			// West
+			8, 9, 10, 8, 10, 11,
+			// South
+			12, 13, 14, 12, 14, 15,
+			// East
+			16, 17, 18, 16, 18, 19
 		};
-		m.uv = new Vector2[]{
-			new Vector2(0,0),
-			new Vector2(1,0),
-			new Vector2(0,1),
-			new Vector2(1,1),
-			new Vector2(0,0),
-			new Vector2(1,0),
-			new Vector2(0,1),
-			new Vector2(1,1)};
+		m.uv = new Vector2[m.vertexCount];
 		m.RecalculateNormals();
 		mf.sharedMesh = m;
 	}

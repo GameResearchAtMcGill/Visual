@@ -179,6 +179,7 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public override void UpdateMesh()
 	{
+		// TODO: Proper, non-slab, mesh generation
 		if (map == null) return;
 		
 		List<Shape3> shapes = this.shapes;
