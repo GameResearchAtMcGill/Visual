@@ -152,12 +152,15 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 		m.uv = new Vector2[m.vertexCount];
 		m.RecalculateNormals();
 		mf.sharedMesh = m;
+		
+		gameObject.GetComponent<MeshCollider>().sharedMesh = m;
 	}
 	
 	public override void UpdateMesh()
 	{
-		mf.sharedMesh.vertices = Vertices ();
-		mf.sharedMesh.RecalculateNormals();		
+		CreateMesh();
+//		mf.sharedMesh.vertices = Vertices ();
+//		mf.sharedMesh.RecalculateNormals();		
 	}
 	
 	public override void MapChanged()
