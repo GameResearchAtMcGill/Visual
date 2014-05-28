@@ -316,7 +316,7 @@ public abstract class StealthFov : MeshMapChild {
 			
 			foreach (Shape3 shadow in shadows) {
 				if (shadow.PointInside(position)) {
-					//vision_ = vision_.ClipIn(shadow);
+					vision_ = vision_.ClipIn(shadow);
 				} else {
 					vision_ = vision_.ClipOut(shadow);
 				}
