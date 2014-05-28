@@ -209,10 +209,9 @@ public class Shape3: IEnumerable
 				float sum = 0;
 				
 				for (int i = 0; i < Count; i++) {
-					Edge3Abs e1 = GetEdge(i);
-					Edge3Abs e2 = GetEdge(i + 1);
+					Edge3Abs e = GetEdge(i);
 					
-					sum += Vector3.Cross(e1.GetDiff(), e2.GetDiff()).y;
+					sum += (e.b.x - e.a.x)*(e.b.z + e.b.z);
 				}
 				
 				if (sum == 0) {
@@ -279,7 +278,6 @@ public class Shape3: IEnumerable
 		}
 		// Make the clipper counterclockwise
 		if (clipper.handedness != Handedness.Right) {
-			
 			clipper.Reverse();
 		}
 		
@@ -290,6 +288,7 @@ public class Shape3: IEnumerable
 		// Traverse the shape to find a vertex outside of the clipper
 		while (clipper.PointInside(start)) {
 			if (ai >= vertices.Count - 1) {
+				Debug.LogError("inside");
 				return new Shape3();
 			}
 			start = vertices[++ai];
@@ -350,8 +349,6 @@ public class Shape3: IEnumerable
 				mayContinue = false;
 			}
 		} while (current != start || mayContinue);
-		// I guess this will be an infinite loop with improper shapes
-		
 		
 		return clipped;
 	}

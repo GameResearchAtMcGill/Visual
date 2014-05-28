@@ -294,7 +294,6 @@ public abstract class StealthFov : MeshMapChild {
 			vision_.AddVertex(e.a);
 		}
 		
-		List<Shape3> clipping = new List<Shape3>();
 		foreach (IObstacle o in map.GetObstacles()) {
 			
 			// Very broad pruning
@@ -312,17 +311,12 @@ public abstract class StealthFov : MeshMapChild {
 			}
 			if (cont) continue;
 			
-			// Clip in obstacles that are surrounding later
-			if (o.GetShape().PointInside(position)) {
-				clipping.Add(o.GetShape());
-				continue;
-			} 
 			Shape3[] shadows = {o.ShadowPolygon(position, viewDist_)};
 			
 			
 			foreach (Shape3 shadow in shadows) {
 				if (shadow.PointInside(position)) {
-					vision_ = vision_.ClipIn(shadow);
+					//vision_ = vision_.ClipIn(shadow);
 				} else {
 					vision_ = vision_.ClipOut(shadow);
 				}
@@ -343,27 +337,6 @@ public abstract class StealthFov : MeshMapChild {
 			}
 		}
 		
-		int clipped = 0;
-		foreach (Shape3 clip in clipping) {
-			// Avoid unnecessary clipping
-			if (clip.PerimeterIntersect(vision_)) {
-				vision_ = vision_.ClipIn(clip);
-				clipped++;
-			}
-		}
-		
-		if (clipped > 0) {
-			int offset = -1;
-			for (int i = 0; i < vision_.Count; i++) {
-				Vector3 v = vision_[i];
-				v.y = position.y;
-				vision_[i] = v;
-				if (v == position) {
-					offset = i;
-				}
-			}
-			if (offset > 0) vision_.Offset(offset);
-		}
 		
 		return vision_;
 	}

@@ -13,6 +13,8 @@ public class StealthWaypointGuardEditor : Editor {
 	
 	public override void OnInspectorGUI()
 	{
+		GUI.skin.label.wordWrap = true;
+		
 		GUILayout.Label("A guard is meant to represent an enemy which can move and see. Its field of view is occluded by obstacles.");
 		GUILayout.Label("Waypoint Guard Parameters", EditorStyles.boldLabel);
 		

@@ -12,6 +12,8 @@ public class StealthCameraEditor : Editor {
 	
 	public override void OnInspectorGUI()
 	{
+		GUI.skin.label.wordWrap = true;
+		
 		GUILayout.Label("A camera is meant to represent an enemy which cannot move, but can rotate regularly and see. Its field of view is occluded by obstacles.");
 		GUILayout.Label("Camera Parameters", EditorStyles.boldLabel);
 		c.rotation = EditorGUILayout.FloatField ("Rotation", c.rotation);

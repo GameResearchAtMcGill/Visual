@@ -65,8 +65,6 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 	
 	new protected void Awake()
 	{
-		base.Awake();
-		
 		shadows_ = new Dictionary<Vector3, ShadowTuple>();
 		
 		if (gameObject.GetComponent<MeshCollider>() != null) {
@@ -74,7 +72,13 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 			MeshCollider mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
 			mc.convex = true;
 			mc.isTrigger = true;
+		} else {
+			MeshCollider mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
+			mc.convex = true;
+			mc.isTrigger = true;
 		}
+		
+		base.Awake();
 	}
 	
 	void Reset() {
