@@ -53,6 +53,16 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 		}
 	}
 	
+	struct ShadowTuple {
+		public Shape3 shadow;
+		public float dist;
+		
+		public ShadowTuple(Shape3 s, float d) {
+			shadow = s;
+			dist = d;
+		}
+	}
+	
 	private Dictionary<Vector3, ShadowTuple> shadows_;
 	private Dictionary<Vector3, ShadowTuple> shadows {
 		get {
@@ -315,15 +325,5 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 //		ShadowTuple st = new ShadowTuple(ShadowPoly(viewpoint, viewDistance), viewDistance);
 //		shadows_[viewpoint] = st;
 //		return st.shadow;
-	}
-}
-
-public struct ShadowTuple {
-	public Shape3 shadow;
-	public float dist;
-	
-	public ShadowTuple(Shape3 s, float d) {
-		shadow = s;
-		dist = d;
 	}
 }

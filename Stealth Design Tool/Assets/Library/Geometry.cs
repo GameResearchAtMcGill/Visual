@@ -208,12 +208,11 @@ public class Shape3: IEnumerable
 				
 				float sum = 0;
 				
-				for (int i = 0; i < Count; i++) {
-					Edge3Abs e = GetEdge(i);
-					
-					sum += (e.b.x - e.a.x)*(e.b.z + e.b.z);
+				foreach (Edge3Abs e in this) {
+					sum += (e.b.x - e.a.x)*(e.a.z + e.b.z);
 				}
 				
+				// disable once CompareOfFloatsByEqualityOperator
 				if (sum == 0) {
 					hand = Handedness.Unknown;
 				} else if (sum < 0) {
