@@ -10,6 +10,7 @@ public abstract class StealthPlayer : MeshMapChild {
 	
 	public AccessibilitySurface accSurf = null;
 	
+	// disable CompareOfFloatsByEqualityOperator
 	public float maxSpeed {
 		get { return maxSpeed_; }
 		set {
@@ -51,7 +52,7 @@ public abstract class StealthPlayer : MeshMapChild {
 		}
 		
 		if (gameObject.GetComponent<Rigidbody>() == null) {
-			Rigidbody rb = (Rigidbody)gameObject.AddComponent("Rigidbody");
+			var rb = (Rigidbody)gameObject.AddComponent("Rigidbody");
 			rb.useGravity = false;
 		}
 		
@@ -59,7 +60,7 @@ public abstract class StealthPlayer : MeshMapChild {
 		
 		gameObject.layer = 2;
 		
-		Material mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/PlayerMat.mat", typeof(Material));
+		var mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/PlayerMat.mat", typeof(Material));
 		gameObject.renderer.material = mat;
 	}
 	
@@ -82,7 +83,7 @@ public abstract class StealthPlayer : MeshMapChild {
 		List<Pose> pos = getPositions();
 		
 		mf.sharedMesh = null;
-		Mesh m = new Mesh();
+		var m = new Mesh();
 		m.name = "Player trail";
 		Vector3[] vertices;
 		bool capIt = false;
@@ -115,16 +116,12 @@ public abstract class StealthPlayer : MeshMapChild {
 			}
 		}
 		vertices[cap1] = new Vector3(pos[0].posX, 0, pos[0].posZ);
-		if (capIt) {
-			vertices[cap2] = new Vector3(curr.x, map.timeLength, curr.z);
-		} else {
-			vertices[cap2] = new Vector3(curr.x, curr.y, curr.z);
-		}
-		
+		vertices[cap2] = capIt ?
+			new Vector3(curr.x, map.timeLength, curr.z) : new Vector3(curr.x, curr.y, curr.z);
 		
 		m.vertices = vertices;
 		
-		int[] triangles = new int[((vertices.Length-2)/8-1)*16*3+16*3];
+		var triangles = new int[((vertices.Length-2)/8-1)*16*3+16*3];
 		ind = 0;
 		for (int i=0; i<vertices.Length-2-8; i+=8) {
 			for (int j=0; j<8; j++) {

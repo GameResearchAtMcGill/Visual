@@ -8,10 +8,10 @@ public class StealthCamera : StealthFov {
 	public enum Type: byte {
 		Sweeping, Rotating
 	};
-	private enum Sense: byte {
+	enum Sense: byte {
 		CW, CCW
 	}
-	private enum Motion: byte {
+	enum Motion: byte {
 		Turning, Pausing
 	}
 
@@ -33,6 +33,7 @@ public class StealthCamera : StealthFov {
 		}
 	}
 	
+	// disable CompareOfFloatsByEqualityOperator
 	public float omega {
 		get { return omega_; }
 		set {
@@ -77,16 +78,16 @@ public class StealthCamera : StealthFov {
 		cameraID = map.GetCameras ().Count;
 		gameObject.name = "Camera " + cameraID;
 		
-		Material mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/CameraMat.mat", typeof(Material));
+		var mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/CameraMat.mat", typeof(Material));
 		gameObject.renderer.material = mat;
 	}
 	
 	public override List<Shape3> Shapes()
 	{
-		List<Shape3> shLst = new List<Shape3> ();
+		var shLst = new List<Shape3> ();
 		
 		float rot = 0.0f;
-		float time = 0.0f;
+		float curTime = 0.0f;
 		float pauseTime = 0.0f;
 		Sense sense;
 		if (type == Type.Rotating) {
@@ -100,7 +101,7 @@ public class StealthCamera : StealthFov {
 		for (int i = 0; i < numSub; i++) {
 			Gizmos.color = new Color (1.0f, 0.1f, 0.2f);
 			
-			shLst.Add (Occlude(position + new Vector3(0, time, 0), rot + rotation));
+			shLst.Add (Occlude(position + new Vector3(0, curTime, 0), rot + rotation));
 			
 			if (type == Type.Rotating) {
 				if (motion == Motion.Turning) {
@@ -160,7 +161,7 @@ public class StealthCamera : StealthFov {
 					pauseTime += timeStep;
 				}
 			}
-			time += timeStep;
+			curTime += timeStep;
 		}
 		
 		return shLst;

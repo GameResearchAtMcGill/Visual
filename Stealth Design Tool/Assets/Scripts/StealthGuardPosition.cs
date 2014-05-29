@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 [ExecuteInEditMode]
 public class StealthGuardPosition : MonoBehaviour {
@@ -25,6 +24,7 @@ public class StealthGuardPosition : MonoBehaviour {
 		get { return Quaternion.Euler(0, rotation, 0) * velocity_; }
 	}
 	
+	// disable CompareOfFloatsByEqualityOperator
 	public float time
 	{
 		get {return time_; }
@@ -77,9 +77,8 @@ public class StealthGuardPosition : MonoBehaviour {
 	{
 		get {
 			if (gameObject.activeInHierarchy) {
-				if (transform.parent == null)
-					return null;
-				return (StealthCoordGuard)transform.parent.gameObject.GetComponent<StealthCoordGuard>();
+				return transform.parent == null ?
+						null : (StealthCoordGuard)transform.parent.gameObject.GetComponent<StealthCoordGuard>();
 			}
 			return null;
 		}
@@ -92,9 +91,8 @@ public class StealthGuardPosition : MonoBehaviour {
 	{
 		get {
 			if (gameObject.activeInHierarchy ) {
-				if (guard == null)
-					return null;
-				return guard.map;
+				return guard == null ?
+					null : guard.map;
 			}
 			return null;
 		}
@@ -159,11 +157,9 @@ public class StealthGuardPosition : MonoBehaviour {
 			omega_ = -guard.maxOmega;
 		}
 		
-		if (velocity_.y != 1.0f) {
-			velocity_.y = 1.0f;
-		}
+		velocity_.y = 1.0f;
 		
-		Vector2 v = new Vector2(velocity_.x, velocity.z);
+		var v = new Vector2(velocity_.x, velocity.z);
 		if (v.magnitude > guard.maxSpeed) {
 			v *= guard.maxSpeed/v.magnitude;
 			velocity_.x = v.x;

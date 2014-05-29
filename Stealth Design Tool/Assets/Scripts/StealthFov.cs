@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
@@ -10,8 +9,8 @@ public abstract class StealthFov : MeshMapChild {
 	public float viewDist_ = 30f;
 	
 	public float fieldOfView_ = 50f;
-	public float minFov { get { return 1;} }
-	public float maxFov { get { return 359;} }
+	public static float minFov { get { return 1;} }
+	public static float maxFov { get { return 359;} }
 	
 	public int frontSegments_ = 8;
 	public int maxSegments { get { return Mathf.CeilToInt(fieldOfView_/22.5f); } }
@@ -21,6 +20,7 @@ public abstract class StealthFov : MeshMapChild {
 	{
 		get { return viewDist_; }
 		set {
+			// disable once CompareOfFloatsByEqualityOperator
 			if (value != viewDist_) {
 				dirty = true;
 				viewDist_ = value;
@@ -33,6 +33,7 @@ public abstract class StealthFov : MeshMapChild {
 	{
 		get { return fieldOfView_; }
 		set {
+			// disable once CompareOfFloatsByEqualityOperator
 			if (value != fieldOfView_) {
 				dirty = true;
 				fieldOfView_ = value;
@@ -121,7 +122,7 @@ public abstract class StealthFov : MeshMapChild {
 		
 		gameObject.name = "Field of view";
 		
-		Material mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/ShadowVolumeMat.mat", typeof(Material));
+		var mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/ShadowVolumeMat.mat", typeof(Material));
 		gameObject.renderer.material = mat;
 	}
 	
@@ -171,7 +172,7 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public override void CreateMesh()
 	{
-		Mesh m = new Mesh();
+		var m = new Mesh();
 		m.name = "FoV mesh";
 		mf.sharedMesh = m;
 		UpdateMesh ();
@@ -184,8 +185,8 @@ public abstract class StealthFov : MeshMapChild {
 		
 		List<Shape3> shapes = this.shapes;
 		int estimTriangles = 2*shapes.Count * (2 * (2 + frontSegments_));
-		List<Vector3> vertexList = new List<Vector3> (estimTriangles);
-		List<int> triangles = new List<int> (estimTriangles);
+		var vertexList = new List<Vector3> (estimTriangles);
+		var triangles = new List<int> (estimTriangles);
 		
 		float timeStep = map.timeLength / Mathf.FloorToInt((map.timeLength) * map.sub_);
 
@@ -276,7 +277,7 @@ public abstract class StealthFov : MeshMapChild {
 	
 	private float ToTheta(Vector3 p)
 	{
-		Vector3 diff = new Vector3(p.x - position.x, 0, p.z - position.z);
+		var diff = new Vector3(p.x - position.x, 0, p.z - position.z);
 		diff = Quaternion.Euler(0, -rotation, 0) * diff;
 		
 		return Mathf.Atan2(diff.z, diff.x);
@@ -289,7 +290,7 @@ public abstract class StealthFov : MeshMapChild {
 	
 	public Shape3 Occlude(Vector3 position, float rotation)
 	{
-		Shape3 vision_ = new Shape3 ();
+		var vision_ = new Shape3 ();
 		foreach (Edge3Abs e in Vertices(position, rotation)) {
 			vision_.AddVertex(e.a);
 		}
@@ -315,11 +316,8 @@ public abstract class StealthFov : MeshMapChild {
 			
 			
 			foreach (Shape3 shadow in shadows) {
-				if (shadow.PointInside(position)) {
-					vision_ = vision_.ClipIn(shadow);
-				} else {
-					vision_ = vision_.ClipOut(shadow);
-				}
+				vision_ = shadow.PointInside(position) ?
+					vision_.ClipIn(shadow) : vision_.ClipOut(shadow);
 				
 				int offset = -1;
 				// Realign positions
@@ -347,7 +345,7 @@ public abstract class StealthFov : MeshMapChild {
 			frontSegments = 1;
 		}
 
-		Shape3 shape = new Shape3 ();
+		var shape = new Shape3 ();
 		shape.AddVertex (position);
 
 		float step = fieldOfView_ / frontSegments;

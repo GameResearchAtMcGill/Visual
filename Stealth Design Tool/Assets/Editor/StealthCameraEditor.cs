@@ -24,7 +24,7 @@ public class StealthCameraEditor : Editor {
 		if (c.type == StealthCamera.Type.Sweeping)
 			c.amplitude = EditorGUILayout.FloatField ("Amplitude", c.amplitude);
 		c.viewDistance = EditorGUILayout.FloatField ("View Distance", c.viewDistance);
-		c.fieldOfView = EditorGUILayout.Slider("Field of View", c.fieldOfView, c.minFov, c.maxFov);
+		c.fieldOfView = EditorGUILayout.Slider("Field of View", c.fieldOfView, StealthFov.minFov, StealthFov.maxFov);
 		c.frontSegments = EditorGUILayout.IntSlider("Front segments", c.frontSegments, c.minSegments, c.maxSegments);
 		c.pause = EditorGUILayout.FloatField ("Pause", c.pause);
 		StealthFov.debug = EditorGUILayout.Toggle("Debug Gizmos", StealthFov.debug);
@@ -61,6 +61,7 @@ public class StealthCameraEditor : Editor {
 
 		if (lastTool == Tool.Rotate) {
 			Quaternion result = Handles.RotationHandle(c.rotationQ, c.position);
+			// disable once CompareOfFloatsByEqualityOperator
 			if (result.eulerAngles.y != c.rotation) {
 				c.rotation = result.eulerAngles.y;
 			}

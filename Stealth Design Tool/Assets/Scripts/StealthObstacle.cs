@@ -79,11 +79,11 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 		
 		if (gameObject.GetComponent<MeshCollider>() != null) {
 			Object.DestroyImmediate(gameObject.GetComponent<MeshCollider>());
-			MeshCollider mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
+			var mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
 			mc.convex = true;
 			mc.isTrigger = true;
 		} else {
-			MeshCollider mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
+			var mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
 			mc.convex = true;
 			mc.isTrigger = true;
 		}
@@ -93,7 +93,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 	
 	void Reset() {
 		if (gameObject.GetComponent<MeshCollider>() == null) {
-			MeshCollider mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
+			var mc = (MeshCollider)gameObject.AddComponent("MeshCollider");
 			mc.convex = true;
 			mc.isTrigger = true;
 		}
@@ -101,7 +101,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 		obstacleID = map.GetObstacles ().Count - 1;
 		gameObject.name = "Obstacle " + obstacleID;
 		
-		Material mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/ObstacleMat.mat", typeof(Material));
+		var mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/ObstacleMat.mat", typeof(Material));
 		gameObject.renderer.material = mat;
 	}
 	
@@ -152,7 +152,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 	}
 	
 	public override void CreateMesh() {
-		Mesh m = new Mesh ();
+		var m = new Mesh ();
 		m.name = "Obstacle Prism";
 		m.vertices = Vertices ();
 		m.triangles = new []{
@@ -232,7 +232,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 	}
 	
 	private Shape3 ShadowPoly(Vector3 viewpoint, float viewDistance) {
-		Shape3 obsShape = new Shape3 ();
+		var obsShape = new Shape3 ();
 
 		obsShape.AddVertex (rotationQ * new Vector3(sizeX * 0.5f, viewpoint.y, sizeZ * 0.5f) + position);
 		obsShape.AddVertex (rotationQ * new Vector3(sizeX*0.5f, viewpoint.y, -sizeZ*0.5f) + position);
@@ -243,7 +243,7 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 
 		// Detect whether an edge should be projected,
 		// or rather stick to the obstacle
-		bool[] projectedEdge = new bool[4];
+		var projectedEdge = new bool[4];
 		float farthest = 0;
 		int count = 0;
 		int i = 0;
@@ -272,11 +272,11 @@ public class StealthObstacle : MeshMapChild, IObstacle {
 		farthest *= 2f;
 
 		int v = 0;
-		Shape3 shape = new Shape3 ();
+		var shape = new Shape3 ();
 		if (count == 4) {
 			IEnumerator obsShapeRH = obsShape.GetReverseEnumerator();
 			while(obsShapeRH.MoveNext()) {
-				Edge3Abs e = (Edge3Abs)obsShapeRH.Current;
+				var e = (Edge3Abs)obsShapeRH.Current;
 				//shape.addVertex ((e.a - viewpoint).normalized * farthest + viewpoint);
 				shape.AddVertex (e.a);
 			}

@@ -12,6 +12,7 @@ public abstract class MapChild : MonoBehaviour {
 	{
 		get {return position.x; }
 		set {
+			// disable once CompareOfFloatsByEqualityOperator
 			if (position.x != value) {
 				position.x = value;
 				dirty = true;
@@ -25,6 +26,7 @@ public abstract class MapChild : MonoBehaviour {
 	{
 		get {return position.y; }
 		set {
+			// disable once CompareOfFloatsByEqualityOperator
 			if (position.y != value) {
 				position.y = value;
 				dirty = true;
@@ -37,6 +39,7 @@ public abstract class MapChild : MonoBehaviour {
 	{
 		get {return position.z; }
 		set {
+			// disable once CompareOfFloatsByEqualityOperator
 			if (position.z != value) {
 				position.z = value;
 				dirty = true;
@@ -49,6 +52,7 @@ public abstract class MapChild : MonoBehaviour {
 	{
 		get {return rotationQ.eulerAngles.y; }
 		set {
+			// disable once CompareOfFloatsByEqualityOperator
 			if (rotationQ.eulerAngles.y != value) {
 				rotationQ = Quaternion.Euler(0, value, 0);
 				dirty = true;
@@ -62,9 +66,7 @@ public abstract class MapChild : MonoBehaviour {
 	{
 		get {
 			if (gameObject.activeInHierarchy) {
-				if (transform.parent == null)
-					return null;
-				return (Map)transform.parent.gameObject.GetComponent<Map>();
+				return transform.parent == null ? null : (Map)transform.parent.gameObject.GetComponent<Map>();
 			}
 			return null;
 		}

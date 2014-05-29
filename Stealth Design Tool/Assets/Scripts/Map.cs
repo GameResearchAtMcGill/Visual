@@ -99,7 +99,7 @@ public class Map : MonoBehaviour, IObstacle {
 		if (gameObject.GetComponent<MeshCollider> () == null)
 			gameObject.AddComponent ("MeshCollider");
 
-		Material mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/MapMat.mat", typeof(Material));
+		var mat = (Material)AssetDatabase.LoadAssetAtPath("Assets/Materials/MapMat.mat", typeof(Material));
 		gameObject.renderer.material = mat;
 	}
 
@@ -149,7 +149,7 @@ public class Map : MonoBehaviour, IObstacle {
 	
 	public List<StealthPlayer> GetPlayers()
 	{
-		List<StealthPlayer> lst = new List<StealthPlayer>();
+		var lst = new List<StealthPlayer>();
 		
 		foreach (Transform child in gameObject.transform) {
 			if (child.GetComponent<StealthPlayer>()) {
@@ -175,7 +175,7 @@ public class Map : MonoBehaviour, IObstacle {
 
 	public List<IObstacle> GetObstacles()
 	{
-		List<IObstacle> lst = new List<IObstacle>();
+		var lst = new List<IObstacle>();
 		
 		foreach (Transform child in gameObject.transform) {
 			if (child.GetComponent<StealthObstacle>()) {
@@ -191,7 +191,7 @@ public class Map : MonoBehaviour, IObstacle {
 
 	public List<StealthGuard> GetGuards()
 	{
-		List<StealthGuard> lst = new List<StealthGuard>();
+		var lst = new List<StealthGuard>();
 		
 		foreach (Transform child in gameObject.transform) {
 			if (child.GetComponent<StealthGuard>()) {
@@ -204,7 +204,7 @@ public class Map : MonoBehaviour, IObstacle {
 
 	public List<StealthCamera> GetCameras()
 	{
-		List<StealthCamera> lst = new List<StealthCamera> ();
+		var lst = new List<StealthCamera> ();
 
 		foreach (Transform child in gameObject.transform) {
 			if (child.GetComponent<StealthCamera>()) {
@@ -248,7 +248,7 @@ public class Map : MonoBehaviour, IObstacle {
 
 	public void CreateMesh()
 	{
-		Mesh m = new Mesh ();
+		var m = new Mesh ();
 		m.name = "Map Space";
 		m.vertices = Vertices ();
 		m.triangles = new []{
@@ -284,7 +284,7 @@ public class Map : MonoBehaviour, IObstacle {
 	}
 	
 	public Shape3 GetShape() {
-		Shape3 ret = new Shape3();
+		var ret = new Shape3();
 		ret.AddVertex(new Vector3( sizeX*0.5001f, 0, sizeZ*0.5001f));
 		ret.AddVertex(new Vector3( sizeX*0.5001f, 0,-sizeZ*0.5001f));
 		ret.AddVertex(new Vector3(-sizeX*0.5001f, 0,-sizeZ*0.5001f));

@@ -5,36 +5,44 @@ using System.Collections;
 using System.Collections.Generic;
 
 /**
- * An edge between two points (a and b).
+ * An edge from A to B.
  */
 public struct Edge3Abs
 {
+	/** First endpoint */
 	public Vector3 a;
+	/** Second endpoint */
 	public Vector3 b;
 	
+	/** Constructs an edge between a and b. */
 	public Edge3Abs(Vector3 a, Vector3 b)
 	{
 		this.a = a;
 		this.b = b;
 	}
 	
+	/** Point at the middle of the edge */
 	public Vector3 middle { get { return 0.5f * (b + a); } }
+	/** Normal pointing towards the right of the edge */
 	public Vector3 rightNormal { get { return (new Vector3(-(b.z - a.z), 0, b.x - a.x)).normalized; } }
+	/** Normal pointing towards the left of the edge */
 	public Vector3 leftNormal { get { return (new Vector3(b.z - a.z, 0, -(b.x - a.x))).normalized; } }
 	
+	/** Whether or not v is to the right of the edge */
 	public bool RightOf(Vector3 v)
 	{
 		return FPComp.nearlyLessThan(Vector3.Cross(v - a, b - a).y, 0);
 	}
 	
+	/** Whether or not v is to the left of the edge */
 	public bool LeftOf(Vector3 v)
 	{
 		return FPComp.nearlyGreaterThan(Vector3.Cross(v - a, b - a).y, 0);
 	}
 	
+	/** Returns the point on this edge closest to point */
 	public Vector3 ClosestTo(Vector3 point)
 	{
-		// Find point on edge closest to the point
 		float proj_v = Vector3.Dot(point - a, (b - a).normalized);
 		Vector3 closest;
 		if (proj_v < 0)
@@ -47,16 +55,13 @@ public struct Edge3Abs
 		return closest;
 	}
 	
+	/** Returns the point on this edge farthest from point */
 	public Vector3 FarthestFrom(Vector3 point)
 	{
 		float da = Vector3.Distance(point, a);
 		float db = Vector3.Distance(point, b);
 		
-		if (da > db) {
-			return a;
-		} else {
-			return b;
-		}
+		return da > db ? a : b;
 	}
 
 	/** Returns the vector from a to b */
@@ -74,7 +79,6 @@ public struct Edge3Abs
 	 */
 	public Vector3 IntersectXZ(Edge3Abs other)
 	{
-		
 		double p1x = a.x;
 		double p1y = a.z;
 		double p2x = b.x;
@@ -87,6 +91,7 @@ public struct Edge3Abs
 
 		double d = (p1x - p2x) * (q1y - q2y) - (p1y - p2y) * (q1x - q2x);
 
+		// disable once CompareOfFloatsByEqualityOperator
 		if (d == 0)
 			return new Vector3(float.NaN, float.NaN, float.NaN);
 		double xi = ((q1x - q2x) * (p1x * p2y - p1y * p2x) - (p1x - p2x) * (q1x * q2y - q1y * q2x)) / d;
@@ -105,12 +110,12 @@ public struct Edge3Abs
 		return new Vector3((float)xi, a.y, (float)yi);
 	}
 	
-	public override bool Equals(object other)
+	public override bool Equals(object obj)
 	{
-		if (other == null) return false;
-		if (other is Edge3Abs) {
-			return (a == ((Edge3Abs)other).a && b == ((Edge3Abs)other).b) ||
-			(b == ((Edge3Abs)other).a && a == ((Edge3Abs)other).a);
+		if (obj == null) return false;
+		if (obj is Edge3Abs) {
+			return (a == ((Edge3Abs)obj).a && b == ((Edge3Abs)obj).b) ||
+			(b == ((Edge3Abs)obj).a && a == ((Edge3Abs)obj).a);
 		}
 		return false;
 	}
@@ -184,6 +189,7 @@ public struct Pose
 	}
 }
 
+/** Handedness of a shape. */
 public enum Handedness
 {
 	Right,
@@ -196,6 +202,11 @@ public class Shape3: IEnumerable
 	private List<Vector3> vertices = new List<Vector3>();
 	private Handedness hand = Handedness.Unknown;
 	
+	/**
+	 * Returns the handedness of this shape by verifying which area is positive.
+	 * If the handedness is already known, and the shape has not changed,
+	 * no recalculation is done.
+	 */
 	public Handedness handedness
 	{
 		get {
@@ -205,9 +216,7 @@ public class Shape3: IEnumerable
 			}
 			
 			if (hand == Handedness.Unknown) {
-				
 				float sum = 0;
-				
 				foreach (Edge3Abs e in this) {
 					sum += (e.b.x - e.a.x)*(e.a.z + e.b.z);
 				}
@@ -237,15 +246,15 @@ public class Shape3: IEnumerable
 		}
 		
 		Shape3 temp = this;
-		Shape3 clipped = new Shape3();
+		var clipped = new Shape3();
 		
 		foreach (Edge3Abs boundary in convexClipper) {
 			foreach (Edge3Abs e in temp) {
 				Vector3 previous = e.a;
 				Vector3 current = e.b;
 				
-				bool prvIns = Geometry.isLeft(boundary.b, boundary.a, previous);
-				bool curIns = Geometry.isLeft(boundary.b, boundary.a, current);
+				bool prvIns = Geometry.IsLeft(boundary.b, boundary.a, previous);
+				bool curIns = Geometry.IsLeft(boundary.b, boundary.a, current);
 				
 				if (prvIns && curIns) {
 					clipped.AddVertex(current);
@@ -269,7 +278,8 @@ public class Shape3: IEnumerable
 	 * Clip a clipper shape out of this shape using the Weiler-Atherton algorithm
 	 * and returns the result. The shapes should be simple polygons.
 	 */ 
-	public Shape3 ClipOut(Shape3 clipper) {
+	public Shape3 ClipOut(Shape3 clipper)
+	{
 		int iter = 0;
 		// Make the shape clockwise
 		if (handedness != Handedness.Left) {
@@ -281,7 +291,7 @@ public class Shape3: IEnumerable
 		}
 		
 		int ai = 0, bi = 0;
-		Shape3 clipped = new Shape3();
+		var clipped = new Shape3();
 		Vector3 start = vertices[0];
 		
 		// Traverse the shape to find a vertex outside of the clipper
@@ -310,7 +320,7 @@ public class Shape3: IEnumerable
 				return clipped;
 			}
 			current = a.vertices[(ai + 1) % a.Count];
-			Edge3Abs e = new Edge3Abs(previous, current);
+			var e = new Edge3Abs(previous, current);
 			
 			// Find the closest intersection in b
 			float closest = float.PositiveInfinity;
@@ -352,18 +362,20 @@ public class Shape3: IEnumerable
 		return clipped;
 	}
 	
+	/** Translates the shape by t */
 	public void Translate(Vector3 t)
 	{
-		List<Vector3> l = new List<Vector3>();
+		var l = new List<Vector3>();
 		foreach (Vector3 v in vertices) {
 			l.Add(v + t);
 		}
 		vertices = l;
 	}
 	
+	/** Rotates and scales the shape around o */
 	public void RotatedScale(Vector3 o, float rotation, Vector3 scale)
 	{
-		List<Vector3> l = new List<Vector3>();
+		var l = new List<Vector3>();
 		
 		Quaternion qinv = Quaternion.Euler(0, -rotation, 0);
 		Quaternion q = Quaternion.Euler(0, rotation, 0);
@@ -387,6 +399,11 @@ public class Shape3: IEnumerable
 		vertices = l;
 	}
 	
+	/**
+	 * Verifies whether this shape collides with another by verifying
+	 * whether any of the other shape's points lie inside this shape.
+	 * Hence it being dumb.
+	 */ 
 	public bool DumbCollision(Shape3 other)
 	{
 		if (Count > other.Count) {
@@ -401,8 +418,12 @@ public class Shape3: IEnumerable
 		return false;
 	}
 	
-	private Vector3[] GetAxes() {
-		Vector3[] axes = new Vector3[vertices.Count];
+	//===========//
+	// SAT Stuff //
+	//===========//
+	Vector3[] GetAxes()
+	{
+		var axes = new Vector3[vertices.Count];
 		int i = 0;
 		foreach (Edge3Abs e in this) {
 			axes[i++] = e.rightNormal.normalized;
@@ -411,19 +432,23 @@ public class Shape3: IEnumerable
 		return axes;
 	}
 	
-	struct Projection {
+	struct Projection
+	{
 		float min, max;
-		public Projection(float m, float n) {
+		public Projection(float m, float n)
+		{
 			min = m;
 			max = n;
 		}
 		
-		public bool Overlap(Projection other) {
+		public bool Overlap(Projection other)
+		{
 			return Mathf.Max(min, other.min) <= Mathf.Min(max, other.max);
 		}
 	}
 	
-	private Projection Project(Vector3 axis) {
+	Projection Project(Vector3 axis)
+	{
 		float min = Vector3.Dot(axis, vertices[0]);
 		float max = min;
 		foreach (Vector3 v in vertices) {
@@ -437,10 +462,9 @@ public class Shape3: IEnumerable
 		return new Projection(min, max);
 	}
 	
-	/**
-	 * Separating Axis Theorem
-	 */
-	public bool SATCollision(Shape3 convex) {
+	/** Verifies wheter this shape overlaps with another by the Separating Axis Theorem. */
+	public bool SATCollision(Shape3 convex)
+	{
 		// Loop over the axes
 		foreach (Vector3[] axes in new []{GetAxes(), convex.GetAxes()}) {
 			foreach (Vector3 axis in axes) {
@@ -457,7 +481,9 @@ public class Shape3: IEnumerable
 		return true;
 	}
 	
-	public bool PerimeterIntersect(Shape3 other) {
+	/** Verifies whether the perimiter of this shape intersects with another. */
+	public bool PerimeterIntersect(Shape3 other)
+	{
 		Vector3 inter;
 		
 		foreach (Edge3Abs e in this) {
@@ -470,6 +496,7 @@ public class Shape3: IEnumerable
 		return false;
 	}
 	
+	/** Adds a vertex to the shape. */
 	public void AddVertex(Vector3 vert)
 	{
 		if (vertices.Count == 0 || vertices[vertices.Count - 1] != vert) {
@@ -477,18 +504,20 @@ public class Shape3: IEnumerable
 			vertices.Add(vert);
 		}
 	}
-
+	
+	/** Blanks the shape. */
 	public void Clear()
 	{
 		hand = Handedness.Unknown;
 		vertices.Clear();
 	}
-
+	
+	/** Wraparounds the vertices by a certain offset. */
 	public void Offset(int offset)
 	{
 		if (vertices.Count == 0) return;
 		offset = ((offset % vertices.Count) + vertices.Count) % vertices.Count;
-		List<Vector3> newList = new List<Vector3>();
+		var newList = new List<Vector3>();
 
 		for (int i = offset; i - offset < vertices.Count; i++) {
 			newList.Add(vertices[i % vertices.Count]);
@@ -496,19 +525,22 @@ public class Shape3: IEnumerable
 	
 		vertices = newList;
 	}
-
+	
+	/** Returns all the vertices, in an array. */ 
 	public Vector3[] Vertices()
 	{
 		return vertices.ToArray();
 	}
-
+	
+	/** Enumerator for the vertices in their insertion order. */
 	public IEnumerator GetEnumerator()
 	{
 		for (int i = 0; i < vertices.Count; i++) {
 			yield return new Edge3Abs(vertices[i], vertices[(i + 1) % vertices.Count]);
 		}
 	}
-
+	
+	/** Enumerator for the vertices in the reverse order. */
 	public IEnumerator GetReverseEnumerator()
 	{
 		for (int i = vertices.Count; i > 0; i--) {
@@ -516,6 +548,7 @@ public class Shape3: IEnumerable
 		}
 	}
 	
+	/** Reverses the vertices in the shape. */
 	public void Reverse()
 	{
 		vertices.Reverse();
@@ -525,24 +558,24 @@ public class Shape3: IEnumerable
 			hand = Handedness.Left;
 		}
 	}
-
+	
+	/** Vertex getter[]. */ 
 	public Vector3 this[int i] {
 		get { return vertices[i]; }
 		set { vertices[i] = value; }
 	}
-
+	
+	/** Returns the edge following the i<sup>th</sup> vertex. */ 
 	public Edge3Abs GetEdge(int i)
 	{
 		i = ((i % vertices.Count) + vertices.Count) % vertices.Count;
 		return new Edge3Abs(vertices[i], vertices[(i + 1) % vertices.Count]);
 	}
-
-	public int Count {
-		get {
-			return vertices.Count;
-		}
-	}
 	
+	/** Number of vertices in this shape. */ 
+	public int Count { get { return vertices.Count; } }
+	
+	/** Returns whether a points lies within the shape or not. */ 
 	public bool PointInside(Vector3 point)
 	{
 		bool c = false;
@@ -557,7 +590,9 @@ public class Shape3: IEnumerable
 		return c;
 	}
 	
-	public float Area {
+	/** 2D area of the shape, as projected on the XZ-plane. */ 
+	public float Area
+	{
 		get {
 			// Find lowerst z for offset
 			float lowestZ = float.PositiveInfinity;
@@ -579,12 +614,16 @@ public class Shape3: IEnumerable
 	}
 }
 
+/**
+ * A set of points, for which the convex hull can be found.
+ */
 public class SetOfPoints
 {
 	public HashSet<Vector3> points;
 	Shape3 hull;
 	bool dirty;
 	
+	/** Constructs an empty set of point. */ 
 	public SetOfPoints()
 	{
 		points = new HashSet<Vector3>();
@@ -592,13 +631,18 @@ public class SetOfPoints
 		dirty = true;
 	}
 	
-	public void AddPoint(Vector3 point)
+	/**
+	 * Adds a point to the set of points.
+	 * Returns the number of points after inserting the point.
+	 */
+	public int AddPoint(Vector3 point)
 	{
+		// Avoid NaN and infinities.
 		if (float.IsNaN(point.x) || float.IsNaN(point.y) || float.IsNaN(point.z)) {
-			return;
+			return points.Count;
 		}
 		if (float.IsInfinity(point.x) || float.IsInfinity(point.y) || float.IsInfinity(point.z)) {
-			return;
+			return points.Count;
 		}
 		// Rounding to avoid the infinite loop
 		point.x = Mathf.Round(point.x * 100)*0.01f;
@@ -608,8 +652,14 @@ public class SetOfPoints
 			points.Add(point);
 			dirty = true;
 		}
+		return points.Count;
 	}
 	
+	/**
+	 * Returns the convex hull of the set of point. Calculated with the gift-wrapping algorithm (O(nh)).
+	 * If the set of point has not changed since the last invocation, then the convex hull will not
+	 * be re-calculated.
+ 	 */
 	public Shape3 ConvexHull()
 	{
 		if (dirty) {
@@ -618,7 +668,8 @@ public class SetOfPoints
 			
 			if (ptList.Count == 0) {
 				return hull;
-			} else if (ptList.Count == 1) {
+			}
+			if (ptList.Count == 1) {
 				hull.AddVertex(ptList[0]);
 				return hull;
 			}
@@ -631,7 +682,7 @@ public class SetOfPoints
 				hull.AddVertex(pointOnHull);
 				endpoint = ptList[0];
 				for (int j = 1; j < ptList.Count; j++) {
-					if (pointOnHull == endpoint || leftOfLine(ptList[j], pointOnHull, endpoint)) {
+					if (pointOnHull == endpoint || LeftOfLine(ptList[j], pointOnHull, endpoint)) {
 						endpoint = ptList[j];
 					}
 				}
@@ -643,6 +694,7 @@ public class SetOfPoints
 		return hull;
 	}
 	
+	/** Returns the point that is the leftmost, on the X-axis. */ 
 	private static Vector3 LeftMost(List<Vector3> points)
 	{
 		Vector3 leftMost = points[0];
@@ -650,6 +702,7 @@ public class SetOfPoints
 		foreach (Vector3 p in points) {
 			if (p.x < leftMost.x) {
 				leftMost = p;
+			// disable once CompareOfFloatsByEqualityOperator
 			} else if (p.x == leftMost.x) {
 				if (p.z < leftMost.z) {
 					leftMost = p;
@@ -660,13 +713,17 @@ public class SetOfPoints
 		return leftMost;
 	}
 	
-	private static bool leftOfLine(Vector3 p2, Vector3 p0, Vector3 p1)
+	private static bool LeftOfLine(Vector3 p2, Vector3 p0, Vector3 p1)
 	{
 		return (p1.x - p0.x) * (p2.z - p0.z) - (p2.x - p0.x) * (p1.z - p0.z) > 0;
 	}
 }
 
 public static class Geometry {
+	/**
+	 * Calculates the intersection between the line defined by p1 and p2,
+	 * and the line defined by p3 and p4.
+	 */
 	public static Vector3 LineIntersectionXZ(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4) {
 		double x1 = p1.x;
 		double y1 = p1.z;
@@ -680,6 +737,7 @@ public static class Geometry {
 		
 		double denom = (x1 - x2)*(y3 - y4) - (y1 - y2)*(x3 - x4);
 		
+		// disable once CompareOfFloatsByEqualityOperator
 		if (denom == 0) {
 			return new Vector3(float.NaN, float.NaN, float.NaN);
 		}
@@ -690,11 +748,15 @@ public static class Geometry {
 		return new Vector3((float)x, 0, (float)y);
 	}
 	
-	public static bool isLeft(Vector3 l1, Vector3 l2, Vector3 p) {
+	/** Returns whether p is to the left of the line defined by l1 and l2 or not. */
+	public static bool IsLeft(Vector3 l1, Vector3 l2, Vector3 p) {
 		return ((l2.x - l1.x)*(p.z - l1.z) - (l2.z - l1.z)*(p.x - l1.x)) > 0;
 	}
 }
 
+// disable CompareOfFloatsByEqualityOperator
+
+/** Static class for comparing floats with an epsilon value. */
 public static class FPComp {
 	const float EPSILON = 1e-5f;
 	
@@ -703,6 +765,7 @@ public static class FPComp {
 		float absA = Mathf.Abs(a);
 		float absB = Mathf.Abs(b);
 		float diff = Mathf.Abs(a - b);
+		
 		
 		if (a == b) {
 			return true;
@@ -734,6 +797,7 @@ public static class FPComp {
 	}
 }
 
+/** Static class for comparing doubles with an epsilon value. */
 public static class DPComp {
 	const double EPSILON = 1e-8f;
 	
@@ -746,6 +810,7 @@ public static class DPComp {
 		if (a == b) {
 			return true;
 		}
+		
 		if (a == 0 || b == 0 || diff < double.MinValue) {
 			return diff < (epsilon * double.MinValue);
 		}
