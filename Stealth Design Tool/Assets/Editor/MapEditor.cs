@@ -3,7 +3,7 @@ using UnityEditor;
 
 [CustomEditor(typeof(Map))]
 public class MapEditor : Editor {
-	private Map m;
+	public Map m;
 	
 	void Awake ()
 	{
@@ -131,7 +131,20 @@ public class MapEditor : Editor {
 		GUILayout.Label("This is a step by step");
 		if (GUILayout.Button("Step RRT")) 
 		{
-		
+			if(!GameObject.Find("RRT"))
+			{
+				GameObject go = new GameObject();
+				go.transform.parent = m.transform;
+				go.AddComponent("RRT");
+				go.name = "RRT";
+				
+				GameObject.Find("RRT").GetComponent<RRT>().map = m;
+				GameObject.Find("RRT").GetComponent<RRT>().Step(); 
+			}
+			else
+			{
+				GameObject.Find("RRT").GetComponent<RRT>().Step(); 
+			}
 		}
 	}
 
