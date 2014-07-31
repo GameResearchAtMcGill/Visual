@@ -4,14 +4,14 @@ Stealth_Design_Tool/Temp/
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
 # ===================================== #
-ExportedObj/
-obj/
+Stealth_Design_Tool/ExportedObj/
+Stealth_Design_Tool/obj/
 *.svd
 *.userprefs
-/*.csproj
+Stealth_Design_Tool//*.csproj
 *.pidb
 *.suo
-/*.sln
+Stealth_Design_Tool//*.sln
 *.user
 *.unityproj
 *.booproj
@@ -19,10 +19,10 @@ obj/
 # ============ #
 # OS generated #
 # ============ #
-.DS_Store
-.DS_Store?
+Stealth_Design_Tool/.DS_Store
+Stealth_Design_Tool/.DS_Store?
 ._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+Stealth_Design_Tool/.Spotlight-V100
+Stealth_Design_Tool/.Trashes
+Stealth_Design_Tool/ehthumbs.db
+Stealth_Design_Tool/Thumbs.db
