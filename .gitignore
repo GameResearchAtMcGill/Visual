@@ -12,6 +12,7 @@ Stealth_Design_Tool/obj/
 *.svd
 *.userprefs
 Stealth_Design_Tool//*.csproj
+*.csproj
 *.pidb
 *.suo
 Stealth_Design_Tool//*.sln
