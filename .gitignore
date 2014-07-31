@@ -1,6 +1,9 @@
 Stealth_Design_Tool/Library/
 Stealth_Design_Tool/Temp/
 
+Library/
+Temp/
+
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
 # ===================================== #
