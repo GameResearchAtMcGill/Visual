@@ -19,6 +19,8 @@ Stealth_Design_Tool/*.sln
 *.user
 *.unityproj
 *.booproj
+*.sln
+*.csproj
 
 # ============ #
 # OS generated #
