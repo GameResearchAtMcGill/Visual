@@ -97,6 +97,42 @@ public class MapEditor : Editor {
 			go.AddComponent("StealthWaypointPlayer");
 			Selection.activeTransform = go.transform;
 		}
+
+		GUILayout.Label("");
+		GUILayout.Label("RRT", EditorStyles.boldLabel);
+		if (GUILayout.Button("Set start")) 
+		{
+			if(!GameObject.Find("start"))
+			{
+				GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+				go.transform.parent = m.transform;
+				go.AddComponent("RRTStart");
+				Selection.activeTransform = go.transform;
+			}
+			else
+			{
+				Selection.activeTransform = GameObject.Find("start").transform;
+			}
+		}
+		if (GUILayout.Button("Set goal")) 
+		{
+			if(!GameObject.Find("goal"))
+			{
+				GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+				go.transform.parent = m.transform;
+				go.AddComponent("RRTGoal");
+				Selection.activeTransform = go.transform;
+			}
+			else
+			{
+				Selection.activeTransform = GameObject.Find("goal").transform;
+			}
+		}
+		GUILayout.Label("This is a step by step");
+		if (GUILayout.Button("Step RRT")) 
+		{
+		
+		}
 	}
 
 	Tool lastTool = Tool.None;
