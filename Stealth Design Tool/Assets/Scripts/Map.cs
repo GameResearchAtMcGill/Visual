@@ -9,7 +9,7 @@ public class Map : MonoBehaviour, IObstacle {
 	public Vector3 dimensions = new Vector3 (100.0f, 60.0f, 100.0f);
 	public float sub_ = 1;
 	public bool clipMap_ = true;
-	
+
 	public bool clipMap
 	{
 		get { return clipMap_; }
@@ -105,6 +105,8 @@ public class Map : MonoBehaviour, IObstacle {
 
 	void Update ()
 	{
+	
+
 		gameObject.transform.localPosition = Vector3.zero;
 		gameObject.transform.localRotation = new Quaternion (0, 0, 0, 1);
 		gameObject.transform.localScale = Vector3.one;

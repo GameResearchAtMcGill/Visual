@@ -14,7 +14,7 @@ public class RRTPath : StealthWaypointPlayer
 	}
 	public override List<Pose> getPositions()
 	{
-				List<Pose> poses = new List<Pose>(); 
+		List<Pose> poses = new List<Pose>(); 
 		foreach(Vector3 v in path)
 		{
 			poses.Add(new Pose(v,Quaternion.Euler(0, 1, 0)));
