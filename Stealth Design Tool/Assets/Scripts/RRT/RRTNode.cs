@@ -3,6 +3,6 @@ using System.Collections;
 
 public class RRTNode : MonoBehaviour 
 {
-	public RRTNode parent;
-	
+	public RRTNode parent = null;
+	public Color colour = Color.blue; 
 }
