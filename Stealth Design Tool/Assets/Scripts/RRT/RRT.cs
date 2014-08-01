@@ -7,7 +7,8 @@ public class RRT : MonoBehaviour {
 
 	public List<RRTNode> tree = new List<RRTNode>(); 
 	public Map map;
-	public int nodeNb =0; 
+	public int nodeNb =0;
+	public bool foundPath = false;  
 	public void Awake()
 	{
 		gameObject.AddComponent("RRTNode");
@@ -25,6 +26,7 @@ public class RRT : MonoBehaviour {
 		}
 		foreach(RRTNode n in tree)
 		{
+			//Fuck this and change it for vectrocity
 			if(n.parent)
 				Debug.DrawLine(n.transform.position,n.parent.transform.position,n.colour);
 		}
@@ -40,7 +42,9 @@ public class RRT : MonoBehaviour {
 		GameObject o = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 		o.transform.position = v;
 		o.transform.parent = this.transform; 
+		
 		o.name = "Sample " + nodeNb.ToString();
+		nodeNb++; 
 		o.tag = "Sample";
 		//o.GetComponent("Collider").Active = false; 
 		o.AddComponent("RRTNode");
@@ -99,13 +103,39 @@ public class RRT : MonoBehaviour {
 			{	
 				Debug.Log("Found path");
 				//Create a path with player Eugene
+				List<Vector3> path = new List<Vector3>(); 
+				RRTNode read = node; 
 				
+				while(read != null)
+				{
+					path.Add(read.transform.position);
+					//Debug.Log(read.transform.position);
+					read = read.parent;
+				}
+				path.Reverse();
+
+				//Create the object
+				GameObject g = new GameObject(); 
+				RRTPath ppp = g.AddComponent<RRTPath>();
+				ppp.path =  path; 
+				g.transform.parent = gameObject.transform; 
+				g.name = "RRTPath"; 
+
+				ppp.CreateMesh(); 
+
+				//Found path 
+				foundPath= true;
 			}
 		}
 	}
 	public void Find()
 	{
-		
+		for(int i = 0;i<1000;i++)
+		{
+			this.Step(); 
+			if(foundPath)
+				return; 
+		}
 	}
 	public void Clear()
 	{

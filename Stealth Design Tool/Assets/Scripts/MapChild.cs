@@ -70,6 +70,9 @@ public abstract class MapChild : MonoBehaviour {
 			}
 			return null;
 		}
+		set {
+			this.map = value; 
+		}
 	}
 	
 	protected void Awake ()
