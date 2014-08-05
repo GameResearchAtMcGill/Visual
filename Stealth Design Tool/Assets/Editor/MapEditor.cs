@@ -161,6 +161,15 @@ public class MapEditor : Editor {
 			}
 			else
 			{
+
+				DestroyImmediate(GameObject.Find("RRT")); 
+
+				GameObject go = new GameObject();
+				go.transform.parent = m.transform;
+				go.AddComponent("RRT");
+				go.name = "RRT";
+				
+				GameObject.Find("RRT").GetComponent<RRT>().map = m;
 				GameObject.Find("RRT").GetComponent<RRT>().Find(); 
 			}
 		}
